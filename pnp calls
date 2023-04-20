@@ -1,0 +1,10 @@
+import { sp } from "@pnp/sp/presets/all";
+
+const subsiteUrl = "https://yourtenant.sharepoint.com/sites/yoursite/subsite";
+const listTitle = "YourListTitle";
+
+sp.web.getList(`${subsiteUrl}/Lists/${listTitle}`).items.get().then((items) => {
+  items.forEach((item) => {
+    console.log(`Item title: ${item.Title}`);
+  });
+});
