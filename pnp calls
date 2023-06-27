@@ -1,4 +1,47 @@
-import { sp } from "@pnp/sp/presets/all";
+
+var selectElement = document.getElementById("yourSelectElementId");
+var endpointUrl = "https://your-sharepoint-site/_vti_bin/ListData.svc/YourListTitle";
+
+// Make the REST API call to retrieve list items
+var xhr = new XMLHttpRequest();
+xhr.open("GET", endpointUrl, true);
+xhr.setRequestHeader("Accept", "application/json");
+xhr.onreadystatechange = function() {
+  if (xhr.readyState === 4 && xhr.status === 200) {
+    var response = JSON.parse(xhr.responseText);
+    var items = response.d.results;
+    
+    // Append each item to the select dropdown
+    for (var i = 0; i < items.length; i++) {
+      var option = document.createElement("option");
+      option.value = items[i].Id;
+      option.textContent = items[i].Title;
+      selectElement.appendChild(option);
+    }
+  }
+};
+xhr.send();
+
+=======================
+fetch("https://your-sharepoint-site/_api/web/lists/getByTitle('YourListTitle')/items", {
+  headers: { "Accept": "application/json;odata=nometadata" }
+})
+.then(response => response.json())
+.then(data => {
+  var items = data.value;
+  
+  // Append each item to the select dropdown
+  for (var i = 0; i < items.length; i++) {
+    var option = document.createElement("option");
+    option.value = items[i].Id;
+    option.textContent = items[i].Title;
+    document.getElementById("yourSelectElementId").appendChild(option);
+  }
+})
+.catch(error => console.log(error));
+
+
+====import { sp } from "@pnp/sp/presets/all";
 
 const subsiteUrl = "https://yourtenant.sharepoint.com/sites/yoursite/subsite";
 const listTitle = "YourListTitle";
