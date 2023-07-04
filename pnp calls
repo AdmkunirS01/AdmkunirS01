@@ -1,4 +1,29 @@
 
+function getUnmatchedData(arr1, arr2) {
+  var unmatchedData = [];
+
+  for (var i = 0; i < arr1.length; i++) {
+    if (arr2.indexOf(arr1[i]) === -1) {
+      unmatchedData.push(arr1[i]);
+    }
+  }
+  
+  for (var j = 0; j < arr2.length; j++) {
+    if (arr1.indexOf(arr2[j]) === -1) {
+      unmatchedData.push(arr2[j]);
+    }
+  }
+
+  return unmatchedData;
+}
+
+// Example usage
+var array1 = [1, 2, 3, 4];
+var array2 = [3, 4, 5, 6];
+
+var unmatched = getUnmatchedData(array1, array2);
+console.log(unmatched);
+===========================================================
 var selectElement = document.getElementById("yourSelectElementId");
 var endpointUrl = "https://your-sharepoint-site/_vti_bin/ListData.svc/YourListTitle";
 
