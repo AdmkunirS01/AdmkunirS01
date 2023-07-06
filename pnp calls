@@ -1,4 +1,85 @@
+// Set up the SharePoint SOAP endpoint URL
+var serviceUrl = "http://yoursharepointsite.com/_vti_bin/lists.asmx";
 
+// Set up the SOAP request
+var soapEnvelope =
+    '<?xml version="1.0" encoding="utf-8"?>' +
+    '<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' +
+    '               xmlns:xsd="http://www.w3.org/2001/XMLSchema" ' +
+    '               xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">' +
+    '  <soap:Body>' +
+    '    <GetListItems xmlns="http://schemas.microsoft.com/sharepoint/soap/">' +
+    '      <listName>your_list_name</listName>' +
+    '      <rowLimit>1000</rowLimit>' +
+    '      <query>' +
+    '        <Query></Query>' +
+    '      </query>' +
+    '      <viewFields>' +
+    '        <ViewFields></ViewFields>' +
+    '      </viewFields>' +
+    '      <queryOptions>' +
+    '        <QueryOptions>' +
+    '          <Paging ListItemCollectionPositionNext=""></Paging>' +
+    '        </QueryOptions>' +
+    '      </queryOptions>' +
+    '    </GetListItems>' +
+    '  </soap:Body>' +
+    '</soap:Envelope>';
+
+// Create the SOAP client and send the request
+var xmlhttp = new XMLHttpRequest();
+xmlhttp.open("POST", serviceUrl, false);
+xmlhttp.setRequestHeader("Content-Type", "text/xml;charset=utf-8");
+xmlhttp.setRequestHeader("SOAPAction", "http://schemas.microsoft.com/sharepoint/soap/GetListItems");
+xmlhttp.send(soapEnvelope);
+
+// Process the first batch of retrieved items
+var responseXml = xmlhttp.responseXML;
+// ...
+
+
+========================================
+// Function to retrieve SharePoint list items using REST API
+async function getListItems(url, listName, items = [], skiptoken = '') {
+  const endpointUrl = `${url}/_vti_bin/ListData.svc/${listName}`;
+
+  // Prepare the URL with query parameters
+  const queryUrl = `${endpointUrl}?$top=2000${skiptoken ? `&$skiptoken=${encodeURIComponent(skiptoken)}` : ''}`;
+
+  // Make a GET request to retrieve list items
+  const response = await fetch(queryUrl);
+  const data = await response.json();
+
+  // Process the retrieved items
+  items = items.concat(data.d.results);
+
+  // Check if there are more items to retrieve
+  if (data.d.__next) {
+    // Extract the skiptoken from the __next URL
+    const nextUrl = new URL(data.d.__next);
+    const nextSkiptoken = nextUrl.searchParams.get('$skiptoken');
+
+    // Recursively call the function to retrieve the next batch of items
+    items = await getListItems(url, listName, items, nextSkiptoken);
+  }
+
+  return items;
+}
+
+// Usage
+const url = 'http://your-sharepoint-site';
+const listName = 'YourListName';
+
+getListItems(url, listName)
+  .then(items => {
+    // Process the retrieved items
+    console.log(items);
+  })
+  .catch(error => {
+    // Handle any errors
+    console.error(error);
+  });
+=============================================
 function getUnmatchedData(arr1, arr2) {
   var unmatchedData = [];
 
