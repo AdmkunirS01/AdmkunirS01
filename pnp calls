@@ -1,3 +1,67 @@
+function retrieveListItems() {
+  var siteUrl = "https://your-site-url";
+  var listName = "Your List Name";
+  var itemCount = 0;
+  var items = [];
+
+  retrieveItems();
+
+  function retrieveItems() {
+    var soapEnvelope =
+      "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/'>" +
+      "<soapenv:Body>" +
+      "<GetListItems xmlns='http://schemas.microsoft.com/sharepoint/soap/'>" +
+      "<listName>" + listName + "</listName>" +
+      "<query></query>" +
+      "<viewFields></viewFields>" +
+      "<rowLimit>5000</rowLimit>" +
+      "<queryOptions>" +
+      "<QueryOptions>" +
+      "<ViewAttributes Scope='RecursiveAll' />" +
+      "<Paging ListItemCollectionPositionNext=''></Paging>" +
+      "</QueryOptions>" +
+      "</queryOptions>" +
+      "</GetListItems>" +
+      "</soapenv:Body>" +
+      "</soapenv:Envelope>";
+
+    $.ajax({
+      url: siteUrl + "/_vti_bin/lists.asmx",
+      type: "POST",
+      dataType: "xml",
+      data: soapEnvelope,
+      complete: function (xData, status) {
+        $(xData.responseXML)
+          .find("z\\:row, row") // Handle both standard and z:row namespace
+          .each(function () {
+            // Process the retrieved item
+            items.push($(this).attr("ows_Title"));
+          });
+
+        var positionNext = $(xData.responseXML)
+          .find("rs\\:data, data")
+          .attr("ItemCount");
+
+        if (positionNext != null && positionNext !== "") {
+          retrieveItems(); // Retrieve the next batch
+        } else {
+          console.log("All items retrieved:");
+          console.log(items);
+        }
+      },
+      contentType: "text/xml; charset=utf-8",
+      error: function (xhr, ajaxOptions, thrownError) {
+        console.log(xhr.status + " " + thrownError);
+      }
+    });
+  }
+}
+
+// Call the function to retrieve the list items
+retrieveListItems();
+
+===========================
+
 // Set up the SharePoint SOAP endpoint URL
 var serviceUrl = "http://yoursharepointsite.com/_vti_bin/lists.asmx";
 
