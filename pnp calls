@@ -1,4 +1,10 @@
-function retrieveListItemsAndBindToDropdown() {
+<script type="text/javascript" src="/_layouts/15/init.js"></script>
+<script type="text/javascript" src="/_layouts/15/MicrosoftAjax.js"></script>
+<script type="text/javascript" src="/_layouts/15/sp.core.js"></script>
+<script type="text/javascript" src="/_layouts/15/sp.runtime.js"></script>
+<script type="text/javascript" src="/_layouts/15/sp.js"></script>
+
+============function retrieveListItemsAndBindToDropdown() {
   var context = SP.ClientContext.get_current();
   var web = context.get_web();
   var list = web.get_lists().getByTitle("Your List Name");
