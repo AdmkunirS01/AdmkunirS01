@@ -3,6 +3,44 @@ function retrieveListItems() {
   var web = context.get_web();
   var list = web.get_lists().getByTitle("Your List Name");
   var camlQuery = new SP.CamlQuery();
+  camlQuery.set_viewXml("<View><RowLimit>200</RowLimit></View>"); // Adjust the RowLimit as needed (max 500 for compatibility with IE)
+  var items = list.getItems(camlQuery);
+  context.load(items);
+  context.executeQueryAsync(
+    function() {
+      // Success
+      var enumerator = items.getEnumerator();
+      while (enumerator.moveNext()) {
+        var listItem = enumerator.get_current();
+        var title = listItem.get_item("Title"); // Replace "Title" with the internal name of the column you want to retrieve
+
+        // Bind the title to your UI element (e.g., add to dropdown, create HTML elements, etc.)
+        // Example: document.getElementById("your-dropdown-id").add(new Option(title, title));
+      }
+
+      // Check if there are more items to retrieve
+      if (items.get_count() >= camlQuery.get_listItemCollectionPosition().get_pagingInfo()) {
+        camlQuery.set_listItemCollectionPosition(items.get_listItemCollectionPosition());
+        retrieveListItems();
+      }
+    },
+    function(sender, args) {
+      // Error
+      console.log(args.get_message());
+    }
+  );
+}
+
+// Call the function to retrieve items and bind them to the UI element
+retrieveListItems();
+
+===============
+
+function retrieveListItems() {
+  var context = SP.ClientContext.get_current();
+  var web = context.get_web();
+  var list = web.get_lists().getByTitle("Your List Name");
+  var camlQuery = new SP.CamlQuery();
   camlQuery.set_viewXml("<View><RowLimit>500</RowLimit></View>"); // Adjust the RowLimit as needed
   var items = list.getItems(camlQuery);
   context.load(items);
