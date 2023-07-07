@@ -1,4 +1,35 @@
-<script type="text/javascript" src="/_layouts/15/init.js"></script>
+
+function retrieveListItems() {
+  var context = SP.ClientContext.get_current();
+  var web = context.get_web();
+  var list = web.get_lists().getByTitle("Your List Name");
+  var camlQuery = new SP.CamlQuery();
+  camlQuery.set_viewXml("<View><RowLimit>5000</RowLimit></View>"); // Adjust the RowLimit as needed
+  var items = list.getItems(camlQuery);
+  context.load(items, "Include(Title)"); // Include the "Title" column in the load statement
+  context.executeQueryAsync(
+    function() {
+      // Success
+      var titleArray = [];
+      var enumerator = items.getEnumerator();
+      while (enumerator.moveNext()) {
+        var listItem = enumerator.get_current();
+        var title = listItem.get_item("Title"); // Replace "Title" with the internal name of the column you want to retrieve
+        titleArray.push(title);
+      }
+      console.log(titleArray); // Output the array of title values
+    },
+    function(sender, args) {
+      // Error
+      console.log(args.get_message());
+    }
+  );
+}
+
+// Call the function to retrieve items and store the "Title" column values in an array
+retrieveListItems();
+
+======================<script type="text/javascript" src="/_layouts/15/init.js"></script>
 <script type="text/javascript" src="/_layouts/15/MicrosoftAjax.js"></script>
 <script type="text/javascript" src="/_layouts/15/sp.core.js"></script>
 <script type="text/javascript" src="/_layouts/15/sp.runtime.js"></script>
