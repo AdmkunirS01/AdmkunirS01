@@ -1,3 +1,43 @@
+function bindItemsToDropdown() {
+  var context = SP.ClientContext.get_current();
+  var web = context.get_web();
+  var list = web.get_lists().getByTitle("Your List Name");
+  var camlQuery = new SP.CamlQuery();
+  camlQuery.set_viewXml("<View><RowLimit>200</RowLimit></View>"); // Adjust the RowLimit as needed (max 500 for compatibility with IE)
+  var items = list.getItems(camlQuery);
+  context.load(items);
+  context.executeQueryAsync(
+    function() {
+      // Success
+      var enumerator = items.getEnumerator();
+      var dropdown = document.getElementById("your-dropdown-id"); // Replace with the ID of your dropdown element
+      while (enumerator.moveNext()) {
+        var listItem = enumerator.get_current();
+        var title = listItem.get_item("Title"); // Replace "Title" with the internal name of the column you want to retrieve
+
+        var option = document.createElement("option");
+        option.value = listItem.get_id();
+        option.text = title;
+        dropdown.appendChild(option);
+      }
+
+      // Check if there are more items to retrieve
+      if (items.get_count() >= camlQuery.get_listItemCollectionPosition().get_pagingInfo()) {
+        camlQuery.set_listItemCollectionPosition(items.get_listItemCollectionPosition());
+        bindItemsToDropdown();
+      }
+    },
+    function(sender, args) {
+      // Error
+      console.log(args.get_message());
+    }
+  );
+}
+
+// Call the function to bind items to the dropdown
+bindItemsToDropdown();
+
+=======================================
 function retrieveListItems() {
   var context = SP.ClientContext.get_current();
   var web = context.get_web();
