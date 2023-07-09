@@ -1,4 +1,15 @@
-function bindItemsToDropdown() {
+function detectInternetExplorer() {
+  var userAgent = window.navigator.userAgent;
+  var isIE = userAgent.indexOf("MSIE") !== -1 || userAgent.indexOf("Trident/") !== -1;
+  if (isIE) {
+    alert("Please note that this site may have limited compatibility with Internet Explorer. We recommend using a modern browser for the best experience.");
+  }
+}
+
+// Call the function to detect Internet Explorer and display the alert message
+detectInternetExplorer();
+
+=====================function bindItemsToDropdown() {
   var context = SP.ClientContext.get_current();
   var web = context.get_web();
   var list = web.get_lists().getByTitle("Your List Name");
