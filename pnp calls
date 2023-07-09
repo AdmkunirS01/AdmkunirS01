@@ -2,6 +2,21 @@ function detectInternetExplorer() {
   var userAgent = window.navigator.userAgent;
   var isIE = userAgent.indexOf("MSIE") !== -1 || userAgent.indexOf("Trident/") !== -1;
   if (isIE) {
+    alert("Please note that this site may have limited compatibility with Internet Explorer. We recommend using a modern browser like Chrome for the best experience.");
+
+    var siteUrl = window.location.href;
+    var chromeUrl = "googlechrome://navigate?url=" + encodeURIComponent(siteUrl);
+    window.open(chromeUrl);
+  }
+}
+
+// Call the function to detect Internet Explorer, display the alert message, and open the site in Chrome
+detectInternetExplorer();
+
+=======function detectInternetExplorer() {
+  var userAgent = window.navigator.userAgent;
+  var isIE = userAgent.indexOf("MSIE") !== -1 || userAgent.indexOf("Trident/") !== -1;
+  if (isIE) {
     alert("Please note that this site may have limited compatibility with Internet Explorer. We recommend using a modern browser for the best experience.");
   }
 }
