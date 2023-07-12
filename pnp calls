@@ -18,6 +18,55 @@ $(document).ready(function() {
         'querytext': searchTerm,
         'rowlimit': 10, // Row limit
         'startrow': 0, // Start row
+        'selectproperties': 'Title,Path,RefinableString01,RefinableInt01', // Select specific properties, including refinable properties
+        'trimduplicates': true // Trim duplicates
+      }
+    })
+    .then(function(data) {
+      // Process the search results
+      var results = data.d.query.PrimaryQueryResult.RelevantResults.Table.Rows.results;
+      results.forEach(function(result) {
+        var title = result.Cells.results.find(function(cell) {
+          return cell.Key === "Title";
+        }).Value;
+        var path = result.Cells.results.find(function(cell) {
+          return cell.Key === "Path";
+        }).Value;
+        var refinableString = result.Cells.results.find(function(cell) {
+          return cell.Key === "RefinableString01";
+        }).Value;
+        var refinableInt = result.Cells.results.find(function(cell) {
+          return cell.Key === "RefinableInt01";
+        }).Value;
+        console.log(title + " - " + path + " - " + refinableString + " - " + refinableInt);
+      });
+    })
+    .fail(function(error) {
+      console.log(error);
+    });
+  });
+});
+
+======================$(document).ready(function() {
+  // SharePoint Search API endpoint
+  var apiUrl = "https://your-sharepoint-site/_api/search/query";
+
+  // Search button click event handler
+  $("#searchButton").click(function() {
+    var searchTerm = $("#searchTerm").val();
+
+    // Make AJAX request to the SharePoint Search API endpoint
+    $.ajax({
+      url: apiUrl,
+      method: "GET",
+      headers: {
+        "Accept": "application/json;odata=verbose",
+        "Content-Type": "application/json;odata=verbose"
+      },
+      data: {
+        'querytext': searchTerm,
+        'rowlimit': 10, // Row limit
+        'startrow': 0, // Start row
         'selectproperties': 'Title,Path', // Select specific properties
         'trimduplicates': true // Trim duplicates
       }
