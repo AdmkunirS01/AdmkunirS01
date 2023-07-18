@@ -1,3 +1,56 @@
+
+import * as React from "react";
+import { performSearch } from "./MySearchUtil"; // Replace with the path to your search utility file
+
+interface IMySearchComponentProps {
+  siteUrl: string;
+}
+
+interface IMySearchComponentState {
+  searchResults: any[];
+}
+
+export default class MySearchComponent extends React.Component<
+  IMySearchComponentProps,
+  IMySearchComponentState
+> {
+  constructor(props: IMySearchComponentProps) {
+    super(props);
+    this.state = {
+      searchResults: [],
+    };
+  }
+
+  async componentDidMount() {
+    const { siteUrl } = this.props;
+    const keyword = "your_keyword_here";
+    const startRow = 0;
+    const rowLimit = 10;
+    const selectProperties = ["Title", "Path"];
+
+    const results = await performSearch(siteUrl, keyword, startRow, rowLimit, selectProperties);
+    this.setState({ searchResults: results });
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>Search Results</h1>
+        <ul>
+          {this.state.searchResults.map((item) => (
+            <li key={item.UniqueId}>
+              <a href={item.Path}>{item.Title}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+}
+
+
+≈=====≈=====
+
 export default class MySearchWebPart extends React.Component<IMySearchWebPartProps, any> {
   public constructor(props: IMySearchWebPartProps) {
     super(props);
