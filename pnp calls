@@ -1,4 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SharePoint Search API Example with POST and jQuery Ajax</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>SharePoint Search</h1>
+    <input type="text" id="searchInput" placeholder="Enter keyword">
+    <button onclick="searchDocuments()">Search</button>
+    <div id="searchResults"></div>
 
+    <script>
+        function searchDocuments() {
+            var keyword = document.getElementById('searchInput').value;
+            var path = "/sites/your-site/subsite"; // Replace with your SharePoint path
+            var endpointUrl = _spPageContextInfo.siteAbsoluteUrl + "/_api/search/postquery";
+
+            var searchQuery = {
+                'request': {
+                    '__metadata': { 'type': 'Microsoft.Office.Server.Search.REST.SearchRequest' },
+                    'Querytext': `${keyword} path:${path}`,
+                    'RowLimit': 10,
+                    'SelectProperties': {
+                        'results': ['Title', 'Path']
+                    }
+                }
+            };
+
+            $.ajax({
+                url: endpointUrl,
+                type: "POST",
+                data: JSON.stringify(searchQuery),
+                contentType: "application/json;odata=verbose",
+                headers: {
+                    "Accept": "application/json;odata=verbose",
+                },
+                success: function (data) {
+                    displayResults(data.d.postquery.PrimaryQueryResult.RelevantResults.Table.Rows);
+                },
+                error: function (error) {
+                    console.log("Error: " + JSON.stringify(error));
+                }
+            });
+        }
+
+        function displayResults(results) {
+            var searchResultsDiv = document.getElementById('searchResults');
+            searchResultsDiv.innerHTML = '';
+
+            if (results.length > 0) {
+                for (var i = 0; i < results.length; i++) {
+                    var result = results[i].Cells.results;
+                    var title = result.find(function (item) { return item.Key === "Title"; }).Value;
+                    var path = result.find(function (item) { return item.Key === "Path"; }).Value;
+
+                    var link = document.createElement('a');
+                    link.href = path;
+                    link.textContent = title;
+
+                    var resultDiv = document.createElement('div');
+                    resultDiv.appendChild(link);
+
+                    searchResultsDiv.appendChild(resultDiv);
+                }
+            } else {
+                searchResultsDiv.textContent = "No results found.";
+            }
+        }
+    </script>
+</body>
+</html>
+
+===========
 import * as React from "react";
 import { performSearch } from "./MySearchUtil"; // Replace with the path to your search utility file
 
