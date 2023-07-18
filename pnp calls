@@ -1,3 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SharePoint Search API Example with REST and Ajax</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>SharePoint Search</h1>
+    <input type="text" id="searchInput" placeholder="Enter keyword">
+    <button onclick="searchDocuments()">Search</button>
+    <div id="searchResults"></div>
+
+    <script>
+        function searchDocuments() {
+            var keyword = document.getElementById('searchInput').value;
+            var endpointUrl = _spPageContextInfo.siteAbsoluteUrl + "/_api/search/query?querytext='" + keyword + "'";
+
+            $.ajax({
+                url: endpointUrl,
+                type: "GET",
+                headers: {
+                    "Accept": "application/json; odata=verbose",
+                },
+                success: function (data) {
+                    displayResults(data.d.query.PrimaryQueryResult.RelevantResults.Table.Rows);
+                },
+                error: function (error) {
+                    console.log("Error: " + JSON.stringify(error));
+                }
+            });
+        }
+
+        function displayResults(results) {
+            var searchResultsDiv = document.getElementById('searchResults');
+            searchResultsDiv.innerHTML = '';
+
+            if (results.length > 0) {
+                for (var i = 0; i < results.length; i++) {
+                    var result = results[i].Cells.results;
+                    var title = result.find(function (item) { return item.Key === "Title"; }).Value;
+                    var path = result.find(function (item) { return item.Key === "Path"; }).Value;
+
+                    var link = document.createElement('a');
+                    link.href = path;
+                    link.textContent = title;
+
+                    var resultDiv = document.createElement('div');
+                    resultDiv.appendChild(link);
+
+                    searchResultsDiv.appendChild(resultDiv);
+                }
+            } else {
+                searchResultsDiv.textContent = "No results found.";
+            }
+        }
+    </script>
+</body>
+</html>
+
+=========
 $(document).ready(function() {
   // SharePoint Search API endpoint
   var apiUrl = "https://your-sharepoint-site/_api/search/query";
