@@ -1,3 +1,47 @@
+export default class MySearchWebPart extends React.Component<IMySearchWebPartProps, any> {
+  public constructor(props: IMySearchWebPartProps) {
+    super(props);
+    this.state = {
+      searchResults: []
+    };
+  }
+
+  public componentDidMount() {
+    // Perform the search
+    this.searchDocuments('your_keyword_here');
+  }
+
+  private async searchDocuments(keyword: string) {
+    try {
+      const searchQuery: SearchQuery = {
+        Querytext: keyword,
+        RowLimit: 10,
+        SelectProperties: ["Title", "Path"]
+      };
+
+      const results: SearchResults = await sp.search(searchQuery);
+
+      this.setState({ searchResults: results.PrimarySearchResults });
+    } catch (error) {
+      console.log('Error:', error);
+    }
+  }
+
+  public render(): React.ReactElement<IMySearchWebPartProps> {
+    return (
+      <div>
+        <h1>Search Results</h1>
+        <ul>
+          {this.state.searchResults.map((item: any) => (
+            <li key={item.UniqueId}>
+              <a href={item.Path}>{item.Title}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+}
 
 
 =========
