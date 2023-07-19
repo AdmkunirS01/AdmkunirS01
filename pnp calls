@@ -1,5 +1,59 @@
+import React, { Component } from 'react';
+
+class SharePointData extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      filterData: [],
+    };
+  }
+
+  componentDidMount() {
+    // Fetch data from multiple SharePoint lists and store them in the state.
+    // Example:
+    // fetchSharePointList1Data().then((list1Data) => this.setState({ list1Data }));
+    // fetchSharePointList2Data().then((list2Data) => this.setState({ list2Data }));
+    // ...
+    // fetchSharePointList6Data().then((list6Data) => this.setState({ list6Data }));
+  }
+
+  filterDataByKeyword = () => {
+    const { list1Data, list2Data, list3Data, list4Data, list5Data, list6Data, keyword } = this.state;
+
+    // Filter data for each list separately
+    const filterDataList1 = this.filterListData(list1Data, keyword, 'Title', 'Description');
+    const filterDataList2 = this.filterListData(list2Data, keyword, 'Name', 'Desc');
+    const filterDataList3 = this.filterListData(list3Data, keyword, 'ItemTitle', 'ItemDesc');
+    const filterDataList4 = this.filterListData(list4Data, keyword, 'ProjectName', 'ProjectDescription');
+    const filterDataList5 = this.filterListData(list5Data, keyword, 'TaskTitle', 'TaskDescription');
+    const filterDataList6 = this.filterListData(list6Data, keyword, 'EventName', 'EventDescription');
+
+    // Combine the filtered results from all lists
+    const combinedFilterData = [
+      ...filterDataList1,
+      ...filterDataList2,
+      ...filterDataList3,
+      ...filterDataList4,
+      ...filterDataList5,
+      ...filterDataList6,
+    ];
+
+    this.setState({ filterData: combinedFilterData });
+  };
+
+  filterListData = (listData, keyword, titleField, descriptionField) => {
+    if (listData && listData.value && keyword) {
+      return listData.value.filter((res) => {
+        if (res[titleField] && res[titleField] !== null && keyword !== null) {
+          // Check if either 'Title' or 'Description' contains the keyword
+          const titleMatchesKeyword = res[titleField].toLowerCase().includes(keyword.toLowerCase());
+          const descriptionMatchesKeyword =
+            res[descriptionField] &&
+
+
 ≈=========
-// Assuming 'result' contains the data fetched from SharePoint
+//
+Assuming 'result' contains the data fetched from SharePoint
 
 let filterData = result.value.filter((res) => {
   if (res.Title && res.Title != null && this.keyword && this.keyword != null) {
