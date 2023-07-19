@@ -1,4 +1,11 @@
-<!DOCTYPE html>
+  let filterData = result.value.filter((res) => {
+            
+                            if(res.Title && res.Title!=null &&this.keyword && this.keyword!=null )
+            
+            
+                          return res.Title.toLowerCase().includes(this.keyword.toLowerCase())
+
+===========<!DOCTYPE html>
 <html>
 <head>
     <title>SharePoint Search API Example with POST and jQuery Ajax</title>
