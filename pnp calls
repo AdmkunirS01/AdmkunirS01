@@ -1,4 +1,22 @@
-  let filterData = result.value.filter((res) => {
+≈=========
+// Assuming 'result' contains the data fetched from SharePoint
+
+let filterData = result.value.filter((res) => {
+  if (res.Title && res.Title != null && this.keyword && this.keyword != null) {
+    // Check if either 'Title' or 'Description' contains the keyword
+    const titleMatchesKeyword = res.Title.toLowerCase().includes(this.keyword.toLowerCase());
+    const descriptionMatchesKeyword = res.Description && res.Description.toLowerCase().includes(this.keyword.toLowerCase());
+
+    return titleMatchesKeyword || descriptionMatchesKeyword;
+  } else {
+    return false;
+  }
+});
+
+
+
+
+let filterData = result.value.filter((res) => {
             
                             if(res.Title && res.Title!=null &&this.keyword && this.keyword!=null )
             
