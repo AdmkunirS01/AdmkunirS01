@@ -1,4 +1,41 @@
- getenterpricelistdata=()=> {
+const getAllListData = () => {
+  const policyApiUrl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Policies')/items?$select=*,Policy_Owner/Title,Policy_Delegate/Title,PolicyArea/Title,PolicySubSection/Policy_SubSection&$expand=Policy_Owner,Policy_Delegate,PolicyArea,PolicySubSection&$top=5000";
+  const anotherListApiUrl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('AnotherList')/items?$select=*,Column1,Column2,Column3&$top=5000";
+  
+  const policyRequest = jQuery.ajax({
+    url: policyApiUrl,
+    type: 'GET',
+    headers: {
+      'Accept': 'application/json;odata=nometadata'
+    }
+  });
+
+  const anotherListRequest = jQuery.ajax({
+    url: anotherListApiUrl,
+    type: 'GET',
+    headers: {
+      'Accept': 'application/json;odata=nometadata'
+    }
+  });
+
+  // Combine both requests using jQuery.when
+  return jQuery.when(policyRequest, anotherListRequest).then((policyResult, anotherListResult) => {
+    const policyData = policyResult[0].value;
+    const anotherListData = anotherListResult[0].value;
+
+    console.log("Policies Data: ", policyData);
+    console.log("AnotherList Data: ", anotherListData);
+
+    // Process the data as needed
+    return {
+      policies: policyData,
+      anotherList: anotherListData
+    };
+  });
+};
+
+
+getenterpricelistdata=()=> {
         var _this = this;
         var enterpricedata=""
   
