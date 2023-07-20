@@ -1,4 +1,70 @@
-import React, { Component } from 'react';
+ getenterpricelistdata=()=> {
+        var _this = this;
+        var enterpricedata=""
+  
+        const apiUrl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Policies')/items?$select=*,Policy_Owner/Title,Policy_Delegate/Title,PolicyArea/Title,PolicySubSection/Policy_SubSection&$expand=Policy_Owner,Policy_Delegate,PolicyArea,PolicySubSection&$top=5000";
+        return new Promise<any[]>((resolve, reject) => {
+         jQuery.ajax({
+         url: apiUrl,        
+        type: 'GET',       
+         headers: {        
+         'Accept': 'application/json;odata=nometadata'       
+        },      
+         success: (result: any) => {       
+         resolve(result.value);
+         console.log("///////////////",result.value)
+         enterpricedata=result.value;
+        
+         if (result && result.value.length > 0 && result.value != null) {
+
+                          let filterData = result.value.filter((res) => {
+            
+                            if(res.Title && res.Title!=null &&this.keyword && this.keyword!=null )
+                            {
+            
+                            const title = res.Title.toLowerCase().includes(this.keyword.toLowerCase());
+                            const policyOverview = res.Overview && res.Overview.toLowerCase().includes(this.keyword.toLowerCase());
+                            const keywords = res.Keywords && res.Keywords.toLowerCase().includes(this.keyword.toLowerCase());
+                            const riskAreas = res.Risk_Domain && res.Risk_Domain.toLowerCase().includes(this.keyword.toLowerCase());
+                            const policyType = res.Policy_Type && res.Policy_Type.toLowerCase().includes(this.keyword.toLowerCase());
+                            const policySection = res.PolicySubSection && res.PolicySubSection.Policy_SubSection.toLowerCase().includes(this.keyword.toLowerCase());
+                            const polNumber = res.Policy_Number && res.Policy_Number.toLowerCase().includes(this.keyword.toLowerCase());
+
+                            const guiding = res.Guiding_Principles && res.Guiding_Principles.toLowerCase().includes(this.keyword.toLowerCase());
+                            const country = res.Geographic_Scope && res.Geographic_Scope.toLowerCase().includes(this.keyword.toLowerCase());
+                            const div = res.Enterprise_Division_BU_Scope && res.Enterprise_Division_BU_Scope.toLowerCase().includes(this.keyword.toLowerCase());
+                            const sponsoring = res.Policy_Sponsoring_Division && res.Policy_Sponsoring_Division.toLowerCase().includes(this.keyword.toLowerCase());
+                            const reviewer = res.Divisional_Reviewer && res.Divisional_Reviewer.toLowerCase().includes(this.keyword.toLowerCase());
+                            const contact = res.PolicyContact_Email && res.PolicyContact_Email.toLowerCase().includes(this.keyword.toLowerCase());
+                            const policyArea = res.PolicyArea.Title && res.PolicyArea.Title.toLowerCase().includes(this.keyword.toLowerCase());
+                            
+                           
+                            return title || policyOverview||keywords||riskAreas||policyType||policySection||polNumber||guiding||country||div||sponsoring||reviewer||contact||policyArea;
+                            }
+                         
+                          
+                         
+            
+                    })
+  
+            console.log("179",filterData)
+                          this.setState({
+                enterpriseSearchResults:filterData
+             })  }
+            
+        
+        
+        
+        },
+         error: (error: any) => {
+       reject(error);
+        }
+         });
+         });
+
+         }
+
+===========import React, { Component } from 'react';
 
 class SharePointData extends Component {
   constructor(props) {
