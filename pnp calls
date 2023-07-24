@@ -1,4 +1,84 @@
- var _this = this;
+var _this = this;
+var enterpricedata = "";
+
+const systemurl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('SOP')/items?$top=5000";
+
+// Function to fetch additional data from another SharePoint list
+function fetchDataFromAnotherList(itemIds) {
+  const anotherListUrl = `https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('AnotherList')/items?$filter=PolicyID eq ${itemIds.join(' or PolicyID eq ')}`;
+
+  return new Promise<any>((resolve, reject) => {
+    jQuery.ajax({
+      url: anotherListUrl,
+      type: 'GET',
+      headers: {
+        'Accept': 'application/json;odata=nometadata'
+      },
+      success: (result: any) => {
+        resolve(result.value);
+      },
+      error: (error: any) => {
+        reject(error);
+      }
+    });
+  });
+}
+
+return new Promise<any[]>((resolve, reject) => {
+  jQuery.ajax({
+    url: systemurl,
+    type: 'GET',
+    headers: {
+      'Accept': 'application/json;odata=nometadata'
+    },
+    success: (result: any) => {
+      resolve(result.value);
+      console.log("Sop", result.value);
+      enterpricedata = result.value;
+
+      if (result && result.value.length > 0 && result.value != null) {
+        let filterSOPData = result.value.filter((res) => {
+          if (res.Title && res.Title != null && _this.keyword && _this.keyword != null) {
+            const title = res.Title.toLowerCase().includes(_this.keyword.toLowerCase());
+            return title;
+          }
+        });
+
+        // Extract Policy IDs from the filtered data
+        const policyIds = filterSOPData.map(item => item.Id);
+
+        // Now, make another API call to get data from another SharePoint list based on policyIds
+        fetchDataFromAnotherList(policyIds)
+          .then((anotherListData: any[]) => {
+            // Combine the data from both lists or perform any additional processing you need.
+            // For example, you can merge the data or do any other operations here.
+            console.log("Data from Another List:", anotherListData);
+
+            // Further processing or data manipulation if needed
+
+            // Final resolved data (if required)
+            resolve(filterSOPData);
+          })
+          .catch((error: any) => {
+            console.error("Error fetching data from Another List:", error);
+            // If an error occurs, you can reject the promise here.
+            reject(error);
+          });
+      } else {
+        // No data found, resolve with an empty array
+        resolve([]);
+      }
+    },
+    error: (error: any) => {
+      console.error("Error fetching SOP data:", error);
+      reject(error);
+    }
+  });
+});
+
+≈=======
+
+var _this = this;
             var enterpricedata=""
             var alldata=[];
             const apiUrl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Policies')/items?$select=*,Policy_Owner/Title,Policy_Delegate/Title,PolicyArea/Title,PolicySubSection/Policy_SubSection&$expand=Policy_Owner,Policy_Delegate,PolicyArea,PolicySubSection&$top=5000";
