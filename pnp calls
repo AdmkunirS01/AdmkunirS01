@@ -1,3 +1,79 @@
+export default class MySPFxWebPart extends React.Component<IMySPFxWebPartProps, {}> {
+  public componentDidMount() {
+    this.loadData();
+  }
+
+  private loadData() {
+    const systemurl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('SOP')/items?$top=5000";
+
+    // Make the first AJAX request to get data from the "SOP" list
+    jQuery.ajax({
+      url: systemurl,
+      type: 'GET',
+      headers: {
+        'Accept': 'application/json;odata=nometadata'
+      },
+      success: (result: any) => {
+        const enterpricedata = result.value;
+        console.log("Sop", enterpricedata);
+
+        if (enterpricedata && enterpricedata.length > 0) {
+          let filterSOPData = enterpricedata.filter((res) => {
+            if (res.Title && res.Title !== null && this.props.keyword && this.props.keyword !== null) {
+              const title = res.Title.toLowerCase().includes(this.props.keyword.toLowerCase());
+              return title;
+            }
+          });
+
+          // Extract Policy IDs from the filtered data
+          const policyIds = filterSOPData.map(item => item.Id);
+
+          // Now, make another AJAX request to get data from another SharePoint list based on policyIds
+          const anotherListUrl = `https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('AnotherList')/items?$filter=PolicyID eq ${policyIds.join(' or PolicyID eq ')}`;
+
+          jQuery.ajax({
+            url: anotherListUrl,
+            type: 'GET',
+            headers: {
+              'Accept': 'application/json;odata=nometadata'
+            },
+            success: (anotherResult: any) => {
+              const anotherListData = anotherResult.value;
+              console.log("Data from Another List:", anotherListData);
+
+              // Further processing or data manipulation if needed
+
+              // Set the state or update the UI with the final data
+              // this.setState({ data: combinedData });
+
+            },
+            error: (error: any) => {
+              console.error("Error fetching data from Another List:", error);
+            }
+          });
+        } else {
+          // No data found, resolve with an empty array
+          // this.setState({ data: [] });
+        }
+      },
+      error: (error: any) => {
+        console.error("Error fetching SOP data:", error);
+      }
+    });
+  }
+
+  public render(): React.ReactElement<IMySPFxWebPartProps> {
+    // Render your web part UI here
+    return (
+      <div>
+        {/* Your web part UI */}
+      </div>
+    );
+  }
+}
+
+
+==========
 var _this = this;
 var enterpricedata = "";
 
