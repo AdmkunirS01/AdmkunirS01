@@ -1,4 +1,152 @@
-  getenterpricelistdata=()=> {
+ getenterpricelistdata=()=> {
+        var _this = this;
+        var enterpricedata=""
+       //const alldata:any[]=[];
+        var filterData;
+       var filterSOPData;
+       var filterSystemData;
+       var filterTrainingData;
+       var filterSRdata;
+       var filteracronymdata;
+       var filterRecomnedata;
+      var alldata;
+       var soparray=[];
+       var systemarray=[];
+       var sopfilterdata=[];
+        const apiUrl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Policies')/items?$select=*,Policy_Owner/Title,Policy_Delegate/Title,PolicyArea/Title,PolicySubSection/Policy_SubSection&$expand=Policy_Owner,Policy_Delegate,PolicyArea,PolicySubSection&$top=5000";
+        const sopurl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('SOP')/items?$top=5000";
+        const systemsurl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Systems')/items?$top=5000";
+        const trainingurl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Training')/items?$top=5000";
+        const supportingResourcesurl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('SupportingResources')/items?$top=5000";
+        const acronymsurl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Acronyms')/items?$top=5000";
+        const recommendedurl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Recommended')/items?$top=5000";
+        return new Promise<any[]>((resolve, reject) => {
+         jQuery.ajax({
+         url: apiUrl,        
+        type: 'GET',       
+         headers: {        
+         'Accept': 'application/json;odata=nometadata'       
+        },      
+         success: (result: any) => {       
+         resolve(result.value);
+         console.log("///////////////",result.value)
+         enterpricedata=result.value;
+        
+         if (result && result.value.length > 0 && result.value != null) {
+
+                           filterData = result.value.filter((res) => {
+            
+                            if(res.Title && res.Title!=null &&this.keyword && this.keyword!=null )
+                            {
+            
+                            const title = res.Title.toLowerCase().includes(this.keyword.toLowerCase());
+                            const policyOverview = res.Overview && res.Overview.toLowerCase().includes(this.keyword.toLowerCase());
+                            const keywords = res.Keywords && res.Keywords.toLowerCase().includes(this.keyword.toLowerCase());
+                            const riskAreas = res.Risk_Domain && res.Risk_Domain.toLowerCase().includes(this.keyword.toLowerCase());
+                            const policyType = res.Policy_Type && res.Policy_Type.toLowerCase().includes(this.keyword.toLowerCase());
+                            const policySection = res.PolicySubSection && res.PolicySubSection.Policy_SubSection.toLowerCase().includes(this.keyword.toLowerCase());
+                            const polNumber = res.Policy_Number && res.Policy_Number.toLowerCase().includes(this.keyword.toLowerCase());
+
+                            const guiding = res.Guiding_Principles && res.Guiding_Principles.toLowerCase().includes(this.keyword.toLowerCase());
+                            const country = res.Geographic_Scope && res.Geographic_Scope.toLowerCase().includes(this.keyword.toLowerCase());
+                            const div = res.Enterprise_Division_BU_Scope && res.Enterprise_Division_BU_Scope.toLowerCase().includes(this.keyword.toLowerCase());
+                            const sponsoring = res.Policy_Sponsoring_Division && res.Policy_Sponsoring_Division.toLowerCase().includes(this.keyword.toLowerCase());
+                            const reviewer = res.Divisional_Reviewer && res.Divisional_Reviewer.toLowerCase().includes(this.keyword.toLowerCase());
+                            const contact = res.PolicyContact_Email && res.PolicyContact_Email.toLowerCase().includes(this.keyword.toLowerCase());
+                            const policyArea = res.PolicyArea.Title && res.PolicyArea.Title.toLowerCase().includes(this.keyword.toLowerCase());
+                            
+                           
+                            return title || policyOverview||keywords||riskAreas||policyType||policySection||polNumber||guiding||country||div||sponsoring||reviewer||contact||policyArea;
+                            }
+                         
+                          
+                         
+            
+                    })
+  
+        
+         }
+            
+         jQuery.ajax({
+            url: sopurl,        
+           type: 'GET',       
+            headers: {        
+            'Accept': 'application/json;odata=nometadata'       
+           },      
+            success: (result: any) => {       
+           
+            console.log("Sop",result.value)
+                       
+            if (result && result.value.length > 0 && result.value != null) {
+   
+                             filterSOPData = result.value.filter((res) => {
+               
+                               if(res.Title && res.Title!=null &&this.keyword && this.keyword!=null )
+                               {
+               
+                               const title = res.Title.toLowerCase().includes(this.keyword.toLowerCase());
+                                                            
+                              
+                               return title;
+                               }
+                           });
+                        }
+                           
+                               const policyIds = filterSOPData.map(item => item.Policy_ID);
+                               const policyidmatch = `https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Policies')/items?$select=*,Policy_Owner/Title,Policy_Delegate/Title,PolicyArea/Title,PolicySubSection/Policy_SubSection&$expand=Policy_Owner,Policy_Delegate,PolicyArea,PolicySubSection&$top=5000&$filter=ID eq ${policyIds.join(' or ID eq ')}`;
+   
+                               jQuery.ajax({
+                                   url:  policyidmatch,
+                                   type: 'GET',
+                                   headers: {
+                                     'Accept': 'application/json;odata=nometadata'
+                                   },      
+                            
+                                   success: (anotherResult: any) => {
+                                       this.sopListData = anotherResult.value;
+                                       console.log("Data from Another List:", this.sopListData);
+                       
+                                      
+                         
+                                     },
+                       })
+     if(this.sopListData.length>0)
+               {
+ this.sopListData.forEach(function (value) {
+                 
+              soparray=value
+                  console.log("num",soparray);
+                }); 
+               }
+           else
+           {
+            soparray=[];
+           }
+                alldata=filterData.concat(soparray);
+                console.log("alldata268",alldata)
+                               this.setState({
+                     enterpriseSearchResults:alldata
+                  }) 
+                  console.log("alldata",this.state.enterpriseSearchResults)
+           
+           },
+            error: (error: any) => {
+          
+           }
+            
+            });
+           
+        
+        },
+         error: (error: any) => {
+       reject(error);
+        }
+         });
+         });
+
+         }
+
+=====================getenterpricelistdata=()=> {
         var _this = this;
         var enterpricedata=""
         var alldata=[];
