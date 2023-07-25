@@ -1,4 +1,71 @@
- getenterpricelistdata=()=> {
+
+// Add this after fetching SOP data
+jQuery.ajax({
+    url: systemsurl,
+    type: 'GET',
+    headers: {
+        'Accept': 'application/json;odata=nometadata'
+    },
+    success: (result: any) => {
+        console.log("Systems Data:", result.value);
+
+        // Filter the system data if needed
+        filterSystemData = result.value.filter((res) => {
+            // Your filtering logic here, similar to the filtering logic for policies
+            // For example:
+            // const title = res.Title.toLowerCase().includes(this.keyword.toLowerCase());
+            // return title;
+        });
+
+        // You can process the filterSystemData as per your requirements or concatenate it with other data
+        // For example, if you want to combine filterData and filterSystemData, you can use concat:
+        // alldata = filterData.concat(filterSystemData);
+
+        // If you need to use filterSystemData separately, you can store it in an array, for example:
+        // systemarray = filterSystemData;
+    },
+    error: (error: any) => {
+        // Handle error if necessary
+    }
+});
+
+
+// Add this after fetching SOP data
+jQuery.ajax({
+    url: systemsurl,
+    type: 'GET',
+    headers: {
+        'Accept': 'application/json;odata=nometadata'
+    },
+    success: (result: any) => {
+        console.log("Systems Data:", result.value);
+
+        // Filter the system data if needed
+        filterSystemData = result.value.filter((res) => {
+            // Your filtering logic here, similar to the filtering logic for policies
+            // For example:
+            // const title = res.Title.toLowerCase().includes(this.keyword.toLowerCase());
+            // return title;
+        });
+
+        // You can process the filterSystemData as per your requirements or concatenate it with other data
+        // For example, if you want to combine filterData and filterSystemData, you can use concat:
+        // alldata = filterData.concat(filterSystemData);
+
+        // If you need to use filterSystemData separately, you can store it in an array, for example:
+        // systemarray = filterSystemData;
+    },
+    error: (error: any) => {
+        // Handle error if necessary
+    }
+});
+
+
+==========
+
+
+
+getenterpricelistdata=()=> {
         var _this = this;
         var enterpricedata=""
        //const alldata:any[]=[];
