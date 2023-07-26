@@ -1,4 +1,69 @@
 jQuery.ajax({
+    url: apiUrl,
+    type: 'GET',
+    headers: {
+        'Accept': 'application/json;odata=nometadata'
+    },
+    success: (result: any) => {
+        // Your existing success callback code
+        resolve(result.value);
+        console.log("///////////////", result.value);
+        enterpricedata = result.value;
+
+        if (result && result.value.length > 0 && result.value != null) {
+            filterData = result.value.filter((res) => {
+                // Your existing filtering logic
+                // ...
+            });
+
+            // Fetching additional API data inside the success callback
+            // First additional API call
+            jQuery.ajax({
+                url: apiUrl2, // Replace with the URL of the second API
+                type: 'GET',
+                headers: {
+                    // Headers for the second API request if needed
+                },
+                success: (result2: any) => {
+                    // Handle the data from the second API here
+                    console.log("Data from the second API:", result2);
+                    // You can process the data or assign it to a variable as needed
+                },
+                error: (error2: any) => {
+                    // Handle errors from the second API request
+                    console.error("Error from the second API:", error2);
+                }
+            });
+
+            // Second additional API call
+            jQuery.ajax({
+                url: apiUrl3, // Replace with the URL of the third API
+                type: 'GET',
+                headers: {
+                    // Headers for the third API request if needed
+                },
+                success: (result3: any) => {
+                    // Handle the data from the third API here
+                    console.log("Data from the third API:", result3);
+                    // You can process the data or assign it to a variable as needed
+                },
+                error: (error3: any) => {
+                    // Handle errors from the third API request
+                    console.error("Error from the third API:", error3);
+                }
+            });
+        }
+    },
+    error: (error: any) => {
+        reject(error);
+    }
+});
+
+
+≈=======
+
+
+uery.ajax({
          url: apiUrl,        
         type: 'GET',       
          headers: {        
