@@ -1,3 +1,1074 @@
+import * as React from 'react';
+import { PolicySearchOM } from './PolicySearchOM';
+import { IPolicySearchProps } from './IPolicySearchProps';
+import * as $ from 'jquery';
+require('bootstrap/dist/js/bootstrap.min.js');
+require('bootstrap/dist/css/bootstrap.min.css');
+import '../Style/Common.css';
+import NavigationBar from '../NavigationBar/NavigationBar';
+import { FontWeights } from 'office-ui-fabric-react/lib/Styling';
+import styless from './PolicySearch.module.scss';
+
+import { Form, FormControl, Nav, Row } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
+import styles from '../../../../fontstyles/fontstyles.scss';
+import Redirect_Page from '../CustomAlert/Redirect_Page';
+
+import pnp, { sp, Item, ItemAddResult, ItemUpdateResult, Web } from 'sp-pnp-js';
+import { SearchQuery, SearchResults, SortDirection } from "sp-pnp-js";
+import { selectProperties } from 'office-ui-fabric-react/lib/Utilities';
+import * as jQuery from 'jquery';
+
+export default class PolicySearch extends React.Component<IPolicySearchProps, {}>{
+
+    private objPolicySearch = new PolicySearchOM();
+    private allPolicies;
+    private siteUrl = "";
+    public keyword;
+    public setRow = 0;   
+    public count = 500;
+    public  combinedData=[];
+    public allListData=[];
+    public systemListData=[];
+    public  allpolicyids=[];
+    public alldata=[];
+
+    constructor(public props: IPolicySearchProps, public state: any) {
+        super(props);
+        this.state = {
+            searched : false,
+            sectionTitle : '',
+            helpModalShow: false,
+            policies :[],
+            policiesData : [],
+            count : 99,
+            nonHostedModalShow : false,
+            searchPlace : "",
+            policyNote : "",
+            redirectModalShow : false,
+            redirectLink : "",
+            noResultsText: "",
+            localMarketCount : 99,
+            enterpriseMarketCount: 99,
+            searchCategory: "all",
+
+            noResultsLocalMarket: "",
+            noResultsEnterpriseMarket: "",
+            allResults: "",
+            localMarket: "",
+            enterprise: "",
+            enterpriseMarketResults: "",
+            localMarketResults: "",
+            showMoreText: "",
+            addFiltersText: "",
+            policyId:"",
+            lastUpdated:"",
+            enterpriseSearchResults: [], 
+            localmarketid:"N/A"   
+      
+ 
+        }
+        
+
+        this.showMore = this.showMore.bind(this);
+        this.loadSection = this.loadSection.bind(this);
+        this.siteUrl = this.props.context.WebFullUrl;
+        this.redirectPolicyPage = this.redirectPolicyPage.bind(this);
+        this.redirectModalClose = this.redirectModalClose.bind(this);
+        this.redirectLink = this.redirectLink.bind(this);
+        this.showMoreResultsLocalMarket = this.showMoreResultsLocalMarket.bind(this);
+
+    this.showMoreResultsEnterprise = this.showMoreResultsEnterprise.bind(this);
+
+        this.keyword = this.getParameter("q", window.location.href);
+        if(this.keyword != null)      
+            this.keyword = this.keyword.trim();
+
+    }
+
+    private showMoreResultsLocalMarket()
+    {
+   
+      var count = this.state.localMarketCount + 99;
+      this.setState({
+        ...this.state, 
+        localMarketCount : count,
+      });
+  
+    } 
+    private showMoreResultsEnterprise() 
+    {
+      var count = this.state.enterpriseMarketCount + 99; 
+      this.setState({
+        ...this.state,
+        enterpriseMarketCount : count, 
+      }); 
+    }
+    
+    public getParameter(param, query) {
+        //debugger;
+        let reg = new RegExp('[?]' + param + '=([^]*)', 'i');
+        let queryString = reg.exec(query);
+        return queryString ? decodeURIComponent(queryString[1]) : null;
+    }
+
+    public redirectModalClose()
+    {
+        this.setState({
+            ...this.state,
+            redirectModalShow : false,
+            redirectLink : ""
+        });
+    }
+
+    public redirectPolicyPage()
+    {
+        this.setState({
+            ...this.state,
+            redirectModalShow: false,
+        });
+        if(this.state.redirectLink != "" || this.state.redirectLink != null)
+            window.open(this.state.redirectLink,"_blank");
+    }
+
+    private redirectLink(e,link, external)
+    {
+        e.preventDefault();
+        if(external)
+        {
+            this.setState({
+                ...this.state,
+                redirectModalShow : true,
+                redirectLink : link
+            });
+        }
+        else
+        {
+            window.open(link, "_blank");
+        }
+    }
+
+    
+    private showMore()
+    {
+        var count = this.state.count + 99;
+        this.setState({
+            ...this.state,
+            count : count,
+        });
+    }
+   
+    getenterpricelistdata=()=> {
+        var _this = this;
+        var enterpricedata=""
+       //const alldata:any[]=[];
+        var filterData=[];
+       var filterSOPData=[];
+       var filterSystemData;
+       var filterTrainingData;
+       var filterSRdata;
+       var filteracronymdata;
+       var filterRecomnedata;
+      var alldata;
+       var  finalarray=[];
+       var systemarray=[];
+       var sopfilterdata=[];
+        const apiUrl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Policies')/items?$select=*,Policy_Owner/Title,Policy_Delegate/Title,PolicyArea/Title,PolicySubSection/Policy_SubSection&$expand=Policy_Owner,Policy_Delegate,PolicyArea,PolicySubSection&$top=5000";
+        const sopurl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('SOP')/items?$top=5000";
+        const systemsurl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Systems')/items?$top=5000";
+        const trainingurl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Training')/items?$top=5000";
+        const supportingResourcesurl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('SupportingResources')/items?$top=5000";
+        const acronymsurl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Acronyms')/items?$top=5000";
+        const recommendedurl = "https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Recommended')/items?$top=5000";
+        return new Promise<any[]>((resolve, reject) => {
+         jQuery.ajax({
+         url: apiUrl,        
+        type: 'GET',       
+         headers: {        
+         'Accept': 'application/json;odata=nometadata'       
+        },      
+         success: (result: any) => {       
+         resolve(result.value);
+         console.log("//",result.value)
+         enterpricedata=result.value;
+        
+         if (result && result.value.length > 0 && result.value != null) {
+
+                           filterData = result.value.filter((res) => {
+            
+                            if(res.Title && res.Title!=null &&this.keyword && this.keyword!=null )
+                            {
+            
+                            const title = res.Title.toLowerCase().includes(this.keyword.toLowerCase());
+                            const policyOverview = res.Overview && res.Overview.toLowerCase().includes(this.keyword.toLowerCase());
+                            const keywords = res.Keywords && res.Keywords.toLowerCase().includes(this.keyword.toLowerCase());
+                            const riskAreas = res.Risk_Domain && res.Risk_Domain.toLowerCase().includes(this.keyword.toLowerCase());
+                            const policyType = res.Policy_Type && res.Policy_Type.toLowerCase().includes(this.keyword.toLowerCase());
+                            const policySection = res.PolicySubSection && res.PolicySubSection.Policy_SubSection.toLowerCase().includes(this.keyword.toLowerCase());
+                            const polNumber = res.Policy_Number && res.Policy_Number.toLowerCase().includes(this.keyword.toLowerCase());
+
+                            const guiding = res.Guiding_Principles && res.Guiding_Principles.toLowerCase().includes(this.keyword.toLowerCase());
+                            const country = res.Geographic_Scope && res.Geographic_Scope.toLowerCase().includes(this.keyword.toLowerCase());
+                            const div = res.Enterprise_Division_BU_Scope && res.Enterprise_Division_BU_Scope.toLowerCase().includes(this.keyword.toLowerCase());
+                            const sponsoring = res.Policy_Sponsoring_Division && res.Policy_Sponsoring_Division.toLowerCase().includes(this.keyword.toLowerCase());
+                            const reviewer = res.Divisional_Reviewer && res.Divisional_Reviewer.toLowerCase().includes(this.keyword.toLowerCase());
+                            const contact = res.PolicyContact_Email && res.PolicyContact_Email.toLowerCase().includes(this.keyword.toLowerCase());
+                            const policyArea = res.PolicyArea.Title && res.PolicyArea.Title.toLowerCase().includes(this.keyword.toLowerCase());
+                            
+                           
+                            return title || policyOverview||keywords||riskAreas||policyType||policySection||polNumber||guiding||country||div||sponsoring||reviewer||contact||policyArea;
+                            }
+                         
+                          console.log("filterpolicydata",filterData)
+                         
+            
+                    })
+  
+        
+         }
+         jQuery.ajax({
+            url: sopurl,        
+           type: 'GET',       
+            headers: {        
+            'Accept': 'application/json;odata=nometadata'       
+           },      
+            success: (result: any) => {       
+           
+            console.log("Sop",result.value)
+                       
+            if (result && result.value.length > 0 && result.value != null) {
+   
+                             filterSOPData = result.value.filter((res) => {
+               
+                               if(res.Title && res.Title!=null &&this.keyword && this.keyword!=null )
+                               {
+               
+                               const title = res.Title.toLowerCase().includes(this.keyword.toLowerCase());
+                                                            
+                              
+                               return title;
+                               }
+                              
+                           });
+                           console.log("SOP filterdata",filterSOPData)
+                        }
+                           
+                              
+           },
+            error: (error: any) => {
+          
+           }
+            
+            });
+            jQuery.ajax({
+                url: systemsurl,        
+               type: 'GET',       
+                headers: {        
+                'Accept': 'application/json;odata=nometadata'       
+               },      
+                success: (result: any) => {       
+               
+                console.log("systemsurl",result.value)
+                           
+                if (result && result.value.length > 0 && result.value != null) {
+       
+                    filterSystemData= result.value.filter((res) => {
+                   
+                                   if(res.Systems_Name && res.Systems_Name!=null &&this.keyword && this.keyword!=null )
+                                   {
+                   
+                                   const systems_Name = res.Systems_Name.trim().toLowerCase().includes(this.keyword.toLowerCase());
+                                                                
+                                  
+                                   return systems_Name;
+                                   
+                                   }
+                                   
+                               });
+                               console.log("filterSystemData",filterSystemData)
+                            }
+                               
+        
+               
+               },
+                error: (error: any) => {
+              
+               }
+                
+                });
+                jQuery.ajax({
+                    url: trainingurl,        
+                   type: 'GET',       
+                    headers: {        
+                    'Accept': 'application/json;odata=nometadata'       
+                   },      
+                    success: (result: any) => {       
+                   
+                    console.log("trainingurl",result.value)
+                               
+                    if (result && result.value.length > 0 && result.value != null) {
+           
+                        filterTrainingData= result.value.filter((res) => {
+                       
+                                       if(res.Training_Name && res.Training_Name!=null &&this.keyword && this.keyword!=null )
+                                       {
+                       
+                                       const training_Name = res.Training_Name.trim().toLowerCase().includes(this.keyword.toLowerCase());
+                                                                    
+                                      
+                                       return training_Name;
+                                       
+                                       }
+                                       
+                                   });
+                                   console.log("filterTrainingData",filterTrainingData)
+                                }
+                                   
+            
+                   
+                   },
+                    error: (error: any) => {
+                  
+                   }
+                    
+                    });
+                    jQuery.ajax({
+                        url: supportingResourcesurl,        
+                       type: 'GET',       
+                        headers: {        
+                        'Accept': 'application/json;odata=nometadata'       
+                       },      
+                        success: (result: any) => {       
+                       
+                        console.log("supportingResourcesurl",result.value)
+                                   
+                        if (result && result.value.length > 0 && result.value != null) {
+               
+                            filterSRdata= result.value.filter((res) => {
+                           
+                                           if(res.Title && res.Title!=null &&this.keyword && this.keyword!=null )
+                                           {
+                           
+                                           const titleSR = res.Title.trim().toLowerCase().includes(this.keyword.toLowerCase());
+                                                                        
+                                          
+                                           return  titleSR;
+                                           
+                                           }
+                                           
+                                       });
+                                       console.log("filterSRdata",filterSRdata)
+                                    }
+                                       
+                
+                       
+                       },
+                        error: (error: any) => {
+                      
+                       }
+                        
+                        });
+                        jQuery.ajax({
+                            url: acronymsurl,        
+                           type: 'GET',       
+                            headers: {        
+                            'Accept': 'application/json;odata=nometadata'       
+                           },      
+                            success: (result: any) => {       
+                           
+                            console.log("acronymsurl",result.value)
+                                       
+                            if (result && result.value.length > 0 && result.value != null) {
+                   
+                                filteracronymdata= result.value.filter((res) => {
+                               
+                                               if(res.Acronym && res.Acronym!=null &&this.keyword && this.keyword!=null )
+                                               {
+                               
+                                               const acronym = res.Acronym.trim().toLowerCase().includes(this.keyword.toLowerCase());
+                                               const definition = res.Definition && res.Definition.toLowerCase().includes(this.keyword.toLowerCase());                           
+                                              
+                                               return  acronym||definition;
+                                               
+                                               }
+                                               
+                                           });
+                                           console.log("filteracronymdata",filteracronymdata)
+                                        }
+                                           
+                    
+                           
+                           },
+                            error: (error: any) => {
+                          
+                           }
+                            
+                            });
+                            jQuery.ajax({
+                                url: recommendedurl,        
+                               type: 'GET',       
+                                headers: {        
+                                'Accept': 'application/json;odata=nometadata'       
+                               },      
+                                success: (result: any) => {       
+                               
+                                console.log("recommendedurl",result.value)
+                                           
+                                if (result && result.value.length > 0 && result.value != null) {
+                       
+                                    filterRecomnedata= result.value.filter((res) => {
+                                   
+                                                   if(res.Document_Name && res.Document_Name!=null &&this.keyword && this.keyword!=null )
+                                                   {
+                                   
+                                                   const document_Name = res.Document_Name.trim().toLowerCase().includes(this.keyword.toLowerCase());
+                                                                                
+                                                  
+                                                   return  document_Name;
+                                                   
+                                                   }
+                                                   
+                                               });
+                                               console.log("filterRecomnedata",filterRecomnedata)
+                                            }
+                                             this.allpolicyids=[...filterSOPData,...filterSystemData,...filterTrainingData,...filterSRdata,...filteracronymdata,...filterRecomnedata]
+                                               console.log("allpolicyids",this.allpolicyids)
+                                           const policyIds = this.allpolicyids.map(item => item.Policy_ID);
+                                            const policyidmatch = `https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/_api/web/lists/getbytitle('Policies')/items?$select=*,Policy_Owner/Title,Policy_Delegate/Title,PolicyArea/Title,PolicySubSection/Policy_SubSection&$expand=Policy_Owner,Policy_Delegate,PolicyArea,PolicySubSection&$top=5000&$filter=ID eq ${policyIds.join(' or ID eq ')}`;
+                
+                                            jQuery.ajax({
+                                                url:  policyidmatch,
+                                                type: 'GET',
+                                                headers: {
+                                                  'Accept': 'application/json;odata=nometadata'
+                                                },      
+                                         
+                                                success: (anotherResult: any) => {
+                                                    this.allListData = anotherResult.value;
+                                                    console.log("finalData:", this.allListData);
+                                    
+                                                   
+                                      
+                                                  },
+                                    })
+                  if(this.allListData.length>0)
+                            {
+              this.allListData.forEach(function (value) {
+                              
+                           finalarray=value
+                               console.log("num", finalarray);
+                             }); 
+                            }
+                        else
+                        {
+                            finalarray=[];
+                        }
+                             alldata=filterData.concat(finalarray);
+                             console.log("alldata268",alldata)
+                                            this.setState({
+                                  enterpriseSearchResults:alldata
+                               }) 
+                               console.log("alldata",this.state.enterpriseSearchResults)
+                        
+                               
+                               },
+                                error: (error: any) => {
+                              
+                               }
+                                
+                                });
+       
+        },
+         error: (error: any) => {
+       reject(error);
+        }
+         });
+        
+           
+        
+         });
+
+         }
+                 
+        public getenterpriceSearchedPolicies()
+        { 
+          var _this = this;
+          var searchedIds = [];
+          //var siteUrl1="https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/CauCar"
+          return new Promise<any>((resolve, reject) =>
+          {
+            
+            sp.search({Querytext : this.keyword+" path:https://pfizer.sharepoint.com/sites/PolicyPoint-Dev/Policy%20Documents/*", 
+            RowLimit:_this.count,
+            StartRow:_this.setRow,
+            SelectProperties: ["RefinableInt00","RefinableString00"],
+            TrimDuplicates: false
+            }).
+            then((p: SearchResults) => {
+                console.log("P",p)
+                for(var j=0 ; j <p.PrimarySearchResults.length ; j++)
+                {
+                    var ids = p.PrimarySearchResults[j]["RefinableInt00"];
+                    var docType = p.PrimarySearchResults[j]["RefinableString00"];
+                    if(ids != "")
+                        searchedIds.push(parseInt(ids));
+                    _this.setRow += 1;
+                                   }
+                if(p.PrimarySearchResults.length < _this.count)
+                {
+                    var result = this.getenterpricelistdata();
+                    result.then(data => {
+                        searchedIds = searchedIds.concat(data);
+                        resolve(searchedIds);
+                                           });
+                }
+                else
+                {                   
+                    var result1 = this.getenterpriceSearchedPolicies();
+                    result1.then(function(data){
+                        searchedIds = searchedIds.concat(data);
+                        resolve(searchedIds);
+                                           });
+                }
+            });
+         });
+        }
+
+    public componentDidMount(): void {
+       // this.getenterpricelistdata();
+        this.getenterpriceSearchedPolicies();
+        //this.getSOPdata();
+
+        var _this = this;
+        if (_this.keyword != null)
+        {
+            $(".se-pre-con").css("display", "block");
+            $("#searchBox").val(_this.keyword);
+        }
+        
+        _this.loadSection(this.props.userLanguage);
+
+        sp.web.lists.getByTitle('Policies').items.getAll().then(data =>{
+            if(data != null)
+            {
+                _this.allPolicies = data;
+                if(_this.keyword != null && _this.keyword != "")
+                    _this.displaySearchedPolicies();
+
+            }
+        });
+        _this.AddEventListeners();
+
+    }
+    
+
+    public componentWillReceiveProps(nextProps)
+    {
+        if(nextProps.userLanguage != this.props.userLanguage)
+            this.loadSection(nextProps.userLanguage);
+    }
+
+    public render(): React.ReactElement<IPolicySearchProps> {
+
+
+        let helpModalClose = () => this.setState({ helpModalShow: false });
+        const handleSelect = (eventKey) => this.setState({ searchCategory: eventKey });
+        return (
+            <>
+            <div className={`containerDiv ${ styless.paddingFooterBottom }`}  style={{ fontFamily: 'FS ALbert-Light', width: '100% !important', backgroundImage: 'none' }}>
+                <div className="se-pre-con" style={{ display: 'none' }}></div>
+
+                <div className={styless.banner} style={{ 'backgroundImage': "url("+this.props.context.WebFullUrl+"/SiteAssets/Images/BackgroundImage.svg)" }}>
+                    <header>
+                        <NavigationBar {...this.props}/>
+                    </header>
+                    <div className={styless.bannerText}>
+                        <h6 id="sectionTitle"></h6>
+                        <Form className="frmSearchBox" style={{ paddingBottom: "O%"}}>
+                            <div id="divSearchControl" style={{ width: '40vw' , margin:'auto'}}>
+                                <FormControl id="searchBox" style={{ height: '38px', borderRadius: '20px' }} type="text" placeholder={this.state.searchPlace} autoComplete="off"
+                                />
+                                <span><FontAwesomeIcon icon={faSearch} id="searchBoxIcon" style={{ float: 'right', marginRight: '8px', marginTop: '-25px', color: 'grey' }} /></span>
+                            </div>
+                        </Form>
+                    </div>
+                </div>
+                {/* Search Results Tab Section  */}
+
+                <div id="searchResults" className="divSearchresults" style={{ paddingLeft: '50px', paddingRight: '50px', paddingBottom: '50px' }}>
+
+{(this.state.searched) &&
+
+ <React.Fragment>
+
+ <Nav variant="pills" defaultActiveKey="localMarketSearch" onSelect={handleSelect}>
+ <Nav.Item style={{ border: '1px solid #808080', borderRadius: '10px', marginRight : '10px' }}>
+ <Nav.Link eventKey="all">{this.state.allResults} ({((this.state.policies && this.state.policies.length) ? this.state.policies.length : 0) + ((this.state.enterpriseSearchResults && this.state.enterpriseSearchResults.length) ? this.state.enterpriseSearchResults.length : 0)})</Nav.Link>
+ </Nav.Item>
+ <Nav.Item style={{ border: '1px solid #808080', borderRadius: '10px', marginRight : '10px'}}>
+ <Nav.Link eventKey="localMarketSearch">{this.state.localMarket} ({(this.state.policies && this.state.policies.length) ? this.state.policies.length : 0})</Nav.Link>
+</Nav.Item>
+ <Nav.Item style={{ border: '1px solid #808080', borderRadius: '10px', marginRight : '10px'}}>
+ <Nav.Link eventKey="enterPriseSearch">{this.state.enterprise} ({(this.state.enterpriseSearchResults && this.state.enterpriseSearchResults.length) ? this.state.enterpriseSearchResults.length : 0})</Nav.Link>
+</Nav.Item>
+</Nav>
+</React.Fragment>}
+ </div>
+                <div id="searchDiv" className="divSearchresults" style={{ paddingLeft: '50px', paddingRight: '50px' }}>
+                {/* {(this.state.searched) && 
+                <Row className={styless.searchDiv}>
+                    <div className="col shadow card">
+                        <div style={{marginLeft:'7%', marginRight:'7%'}}>
+                            <FontAwesomeIcon icon={faExclamationCircle} className={styless.infoIcon}></FontAwesomeIcon>
+                            <div className={styless.infoText} dangerouslySetInnerHTML={{__html: this.state.policyNote}}>                                             
+                            </div>
+                        </div>
+                    </div>
+                </Row>
+                } */}
+                 {(!this.state.searched && this.state.policies.length == 0) && 
+                    <Row style={{height:'4vw'}}/>
+                }
+               {/*  {((this.state.searched !=false) && this.state.policies.length == 0) && 
+                    <Row style={{height:'4vw'}}>
+                          <div id="noSearchResultsDiv" style={{ textAlign: "center", fontSize: '22px', fontWeight: 'bold', marginTop: '1%', padding: '3% 1.3%' }}>{this.state.noResultsText}</div> 
+                    </Row>
+                } */}
+                {this.state.searched && (this.state.searchCategory ==="all" || this.state.searchCategory ==="localMarketSearch") &&
+
+        <React.Fragment>    
+
+                                <Row><h5 style={{ padding: '50px 0px 0px 0px' }}>{this.state.localMarketResults}</h5></Row> <hr style={{ width: '100%', height: '1px', background: '#000000' }} />
+                                {(this.state.policies.length == 0) &&
+                                    <div dangerouslySetInnerHTML={{ __html: this.state.noResultsLocalMarket }} style={{ padding: "0px 50px 0px 50px", fontSize: '17px', fontWeight: 'bold', textAlign: "center" }}>
+
+                                    </div>}
+                                    {this.state.searched && (this.state.policies && this.state.policies.length > 0) &&
+
+        <div id="localMarketSearch" className="row">
+                        {
+                        this.state.policies.slice(0,this.state.localMarketCount).map((item, index ) => (
+
+                            <div className="col-lg-4 col-md-6 col-sm-12 col-xs-12 mt-4 linkTile" style={{display:'flex'}}>
+                                <a  onClick={(e) => {this.redirectLink(e,item.Link, item.External)}}>
+                                    <div className="shadow card policyTile text-center">
+                                        <div className="polAdditional">
+                                            {item.OverviewAll}
+                                        </div>
+                                        <div className="card-body">                                            
+                                            <div className="polTitle">
+                                                {item.Title || "" }
+                                            </div>  
+                                            <p className="polDetails mt-2">{this.state.policyId}:{this.state.localmarketid}  <br></br>{this.state.lastUpdated}:{this.formatDate(item.Modified)} </p>                                              
+                                            <p className="polOverview mt-2">{item.Overview}</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>                        
+                        )
+                        )
+                        }
+                    </div>
+    }
+                    {(this.state.policies.length > this.state.localMarketCount) &&
+
+                  <div id="divShowMore" style={{ textAlign: "center" }}>
+
+                  <button style={{width:'170px', backgroundColor:'#0000ff'}} type="button" onClick={this.showMoreResultsLocalMarket} className="btnShowMore" id="showMore">{this.state.showMoreText}</button></div>
+
+                }
+                    </React.Fragment>
+                    }
+                </div>
+                <div id="enterPriseSearch" className="divSearchresults" style={{ paddingLeft: '50px', paddingRight: '50px' }}>
+
+            {/* Enterprise Search UI*/}           
+
+            {this.state.searched && (this.state.searchCategory ==="all" || this.state.searchCategory ==="enterPriseSearch") &&
+
+              <React.Fragment>
+
+                                <Row><h5 style={{ padding: '50px 0px 0px 0px', textAlign: "left" }}>{this.state.enterpriseMarketResults}</h5></Row> <hr style={{ width: '100%', height: '1px', background: '#000000' }} />
+                                {(this.state.enterpriseSearchResults.length == 0) &&
+
+                                    <div dangerouslySetInnerHTML={{ __html: this.state.noResultsLocalMarket }} style={{ padding: "0px 50px 0px 50px", fontSize: '17px', fontWeight: 'bold', textAlign: "center" }}>
+
+                                    </div>}
+
+                                {this.state.searched && (this.state.enterpriseSearchResults && this.state.enterpriseSearchResults.length > 0) &&
+
+                <div className="row">
+
+                  {this.state.enterpriseSearchResults.slice(0, this.state.enterpriseMarketCount).map((item, index) => (
+
+                    <div className="col-lg-4 col-md-6 col-sm-12 col-xs-12 mt-4 linkTile" style={{ display: 'flex' }}>
+
+            <a target="_blank" href={item.ProfileURL}>
+
+                        <div className="shadow card policyTile text-center">
+
+                          <div className="polAdditional">
+
+                            <div>{this.state.appMarketsText}: {item.ScopeAll}</div>
+
+                            <div>{this.state.appDivisionsText}: {item.DivisionAll}</div>
+
+                          </div>
+
+                          <div className="card-body">
+
+                            <Row>
+
+                              <div className="polTitle col-sm-12">
+
+                                {/* {(item.New) &&
+
+                                  <div>
+
+                                    <span className="newLabel">{this.state.newText}</span>
+
+                                  </div>} */}
+
+                                <div>
+
+                                  {item.Title || ""}
+
+                                </div>
+
+                              </div>
+
+                              <div className="col-sm-1" style={{ float: "right", textAlign: "right" }}>
+
+                                {(item.Subscribed == true) &&
+
+                                  <button className="unsubscribe minusicon" title={this.state.unsubscribeText} value={item.Id}>
+
+                                  </button>}
+
+                                {(item.Subscribed == false) &&
+
+                                  <button className="subscribe plusicon" title={this.state.subscribeText} value={item.Id}>
+
+                                  </button>}
+
+                              </div>
+
+                              <div className="col-sm-1" style={{ float: "right", textAlign: "right" }}>
+
+                                {(item.Bookmarked == true) &&
+
+                                  <i className="fa fa-bookmark" {...item.Attr} title={this.state.removeBookmarkText} style={{ fontSize: '35px' }}></i>}
+
+                                {(item.Bookmarked == false) &&
+
+                                  <i className="fa fa-bookmark-o" title={this.state.bookmarkText} style={{ fontSize: '35px' }}></i>}
+
+                              </div>
+
+                            </Row>
+                            
+                            <p className="polDetails mt-2">{this.state.policyId}: {item.Policy_Number} <br></br>{this.state.lastUpdated}: {item.Last_Updated?<span>{this.formatDate(item.Last_Updated)}</span>:<p></p>}</p>
+
+                            <p className="polOverview mt-2" style={{textOverflow:"ellipsis",overflow:"hidden",display:"-webkit-box",WebkitLineClamp:6,WebkitBoxOrient:"vertical"}}>{item.Overview}</p>
+
+                            {/* {this.dynamicListingPolicies(item.ScopeAll, item.DivisionAll, item.Title, item.Overview)} */}
+
+
+
+
+                          </div>
+
+                          {(item.External) &&
+
+                            <p className="nonHostedLink polNonHosted"> {this.state.readMoreText} </p>}
+
+                        </div>
+
+                      </a>
+
+                    </div>
+
+                  )
+
+                  )}
+
+                </div>    
+    } 
+
+           
+
+            {/* {(this.state.searched) && <div id="footerNote" style={{ paddingTop: '30px', fontSize: '17px', fontWeight: 'bold', textAlign: "center"}}>
+
+              No enterprise market is available for selected language.If you don’t find the results you are seeking in your native language, please also try your search in English.
+
+            </div>} */}
+
+                {(this.state.enterpriseSearchResults.length > this.state.enterpriseMarketCount) &&
+
+                  <div id="divShowMore" style={{ textAlign: "center" }}>
+
+                    <button style={{ width: '170px', backgroundColor: '#0000ff' }} type="button" onClick={this.showMoreResultsEnterprise} className="btnShowMore" id="showMore">{this.state.showMoreText}</button></div>
+
+                }
+
+            </React.Fragment>}
+
+          </div>
+
+
+            </div>
+            <Redirect_Page
+            show={this.state.redirectModalShow}
+            cancelAlert={this.redirectModalClose}
+            redirectAlert={this.redirectPolicyPage} userLanguage={this.props.userLanguage}
+            context={this.props.context}/> 
+          </>
+        );
+    }
+
+    private loadSection(language):void {
+        var  _this = this;
+        var configItems = sp.web.lists.getByTitle('ConfigurationList').items.filter("(Key eq 'SearchBar' or Component eq 'PolicySearch' or Key eq 'NoResultsText' or Key eq 'ShowMoreText' or Key eq 'AllResults' or Key eq 'LocalMarket' or Key eq 'Enterprise' or Key eq 'EnterpriseMarketResults' or Key eq 'LocalMarketResults' or Key eq 'NoLocalMarket' or Key eq 'AddFiltersText') and Language eq '" + language + "'").get();
+        configItems.then(function (items) {
+            console.log(items);
+            var secTitle = "";
+            var policyNote = "";
+            var searchBar = "";
+            var noResults = "";
+            var showMore = "";
+            var allresults = "";
+            var localmarket = "";
+            var enterPrise = "";
+            var enterprisemarketresults = "";
+            var localmarketresults = "";
+            var nolocalmarket = "";
+            var addFilters = "";
+            var allresults="";
+            var policyid="";
+            var lastupdated="";
+                        for (var i = 0; i < items.length; i++) {
+                if (items[i].Key == "PageTitle")
+                    $("#sectionTitle").html(items[i].Value);
+                else if (items[i].Key == "SearchBar")
+                    searchBar  = (items[i].Value);
+                else if (items[i].Key == "NoResultsText")
+                    noResults = (items[i].Value);
+                    else if (items[i].Key == "ShowMoreText") {
+                        showMore = items[i].Value;
+                    }
+    else if (items[i].Key == "AllResults") {
+                        allresults = items[i].Value;
+                    }
+                    else if (items[i].Key == "LocalMarket") {
+                        localmarket = items[i].Value;
+                    }
+                    else if (items[i].Key == "Enterprise") {
+                        enterPrise = items[i].Value;
+                    }
+                    else if (items[i].Key == "EnterpriseMarketResults") {
+                        enterprisemarketresults = items[i].Value;
+                    }
+                    else if (items[i].Key == "LocalMarketResults") {
+                        localmarketresults = items[i].Value;
+                    }
+                    else if (items[i].Key == "NoLocalMarket") {
+                        nolocalmarket = items[i].Value;
+                    }
+    else if (items[i].Key == "AddFiltersText") {
+                        addFilters = items[i].Value;
+                    }
+                    else if (items[i].Key == "PolicyIDText") {
+                        policyid = items[i].Value;
+                    }
+                    else if (items[i].Key == "LastUpdated") {
+                        lastupdated = items[i].Value;
+                    }
+                else if(items[i].Key == "SearchNote")
+                {
+                    var tempArr = (items[i].Value || "").split("#1#");
+                    if(tempArr.length > 1)
+                        tempArr[1] = "<span class='enterpriseLink "+styless.enterpriseLink+"'>" + tempArr[1].trim() + "</span>";
+                    
+                    policyNote = tempArr.join('');
+                }
+            }
+            _this.setState({
+                ..._this.state,
+                sectionTitle : secTitle,
+                policyNote : policyNote,
+                searchPlace : searchBar,
+                noResultsText: noResults,
+                showMoreText: showMore,
+                noResultsLocalMarket: nolocalmarket,
+                noResultsEnterpriseMarket: noResults,
+                allResults: allresults,
+                localMarket: localmarket,
+                enterprise: enterPrise,
+                enterpriseMarketResults: enterprisemarketresults,
+                localMarketResults: localmarketresults,
+                addFiltersText: addFilters,
+                 policyId:policyid,
+                lastUpdated:lastupdated,
+            });
+        });
+    }
+    private AddEventListeners(): any {
+        
+        var _this = this;
+
+        $("#searchBox").keydown(function (event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                $("#searchBoxIcon").click();
+            }
+        });
+
+
+        $(document).mouseup(function (e) {
+            var container = $("#divSearchControl");
+            if (!container.is(e.target) && container.has(e.target).length === 0) {
+                $("#divFrequentSearch").hide();
+                $("#searchBox").removeClass('searchBoxFocused');
+            }
+        });
+
+
+        $("#searchBoxIcon").click(function (event) {
+         
+            var queryString = $("#searchBox").val();
+            if (queryString.trim().length > 0) {
+
+                var url = window.location.href.split('#')[0] + "#/PolicySearch?q=" + queryString.trim();
+                history.pushState(null, null, url);
+                _this.keyword = queryString.trim();
+                _this.objPolicySearch.setRow = 0;
+                _this.displaySearchedPolicies();
+
+                
+            }
+        });
+
+        $(document).delegate('.enterpriseLink', 'click', function (event){
+            event.preventDefault();
+            var link  = _this.props.context.SiteFullUrl+"/SitePages/Welcome.aspx#/LandingPage";
+            _this.setState({
+                ..._this.state,
+                redirectModalShow : true,
+                redirectLink: link
+            })
+        });
+
+
+
+
+    }
+    formatDate = (date:string)=>
+    {
+      const formatteddate= new Date(date).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'});
+     return formatteddate;  
+
+    };
+
+    
+    /*private addSearchKeyword() {
+        var _this = this;
+        var keyToSearch = _this.keyword.toLowerCase();
+        if (keyToSearch != "") {
+            var res = sp.web.lists.getByTitle('Search').items.filter("Title eq '" + keyToSearch + "'").top(1).get();
+            res.then(function (data) {
+                if (data != null && data.length > 0) {
+                    var id = data[0].Id;
+                    var objItem = new Object();
+                    objItem["Count"] = data[0].Count + 1;
+                    sp.web.lists.getByTitle('Search').items.getById(id).update(objItem);
+                }
+                else {
+                    var objItem = new Object();
+                    objItem["Title"] = keyToSearch;
+                    objItem["Count"] = 1;
+                    sp.web.lists.getByTitle('Search').items.add(objItem);
+                }
+            });
+        }
+
+    }*/
+
+    public displaySearchedPolicies(): void {
+      
+        $(".se-pre-con").css("display", "block");
+        var _this = this;
+        $("#searchBox").val(_this.keyword);
+        this.setState({enterpriseMarketResults:[] }, () => this.getenterpricelistdata())     
+        var searchResult = _this.objPolicySearch.loadSearchedPolicies(_this.keyword, _this.siteUrl);
+        var count = 0;
+        var results = [];
+
+       console.log("586", _this.allPolicies)
+        searchResult.then(librarySearch => {
+            _this.objPolicySearch.setRow = 0;
+            _this.objPolicySearch.searchList(_this.keyword,_this.siteUrl).then(async listSearch => {
+                _this.objPolicySearch.setRow = 0;
+                var temp  = _this.allPolicies.filter(d => {return (librarySearch[d.DocumentId] != null || listSearch.indexOf(d.Id) > -1)});
+                temp = temp.filter(d => {return d.Status == "Published"});
+                temp = temp.sort((a,b) => (a.Title > b.Title ? 1 : -1));
+                for (var i = 0; i < temp.length; i++) {
+                    var element = temp[i];
+                    count += 1;
+                    var external = false;
+                    var link = librarySearch[element.DocumentId] || "";
+                    if(link == "" && element.DocumentId != null)
+                    {
+                        var docRef = await sp.web.lists.getByTitle('Policy Documents').items.getById(element.DocumentId).select("*,FileRef").get().then(async d =>{
+                            if(d != null)
+                                link = d.FileRef ;
+
+                        }).catch(err =>{
+                            console.log(err);
+                        });
+                        
+                    }
+                    if(link == "")
+                    {
+                        link = element.Policy_Link || "";
+                        if(link.toLowerCase().indexOf(this.siteUrl.toLowerCase()) == -1)
+                            external = true;
+                    }
+
+                    var overview = element.Overview != null ? element.Overview : "";
+                    var overviewAll = element.Overview != null ? element.Overview : "";
+                    overview = overview.length > 180 ? overview.substring(0, 177) + "..." : overview;
+var modified= element.Modified;
+                    var policyContact = element.Policy_Contact || "";     
+                    var item = {
+                        Title : element.Title,
+                        Id: element.Id,
+                        Overview : overview,
+                        OverviewAll:overviewAll,
+                        Link : link,
+                        PolicyContact : policyContact,
+                        External : external,
+                        Modified:modified
+                    };
+                    results.push(item);                    
+                }
+                _this.setState({
+                    ..._this.state,
+                    policies:results,
+                    searched : true
+                });
+                console.log("Local Market",this.state.policies);
+            });
+
+            
+            $(".se-pre-con").css("display", "none");
+        });
+
+    }
+   
+}
+
+========================
 jQuery.ajax({
     url: apiUrl,
     type: 'GET',
