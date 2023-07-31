@@ -1,4 +1,23 @@
-
+Array(6)
+0
+: 
+{Policy_Owner: Array(2), PolicyArea: {…}, Policy_Delegate: Array(1), FileSystemObjectType: 0, Id: 71, …}
+1
+: 
+{Policy_Owner: Array(2), PolicyArea: {…}, FileSystemObjectType: 0, Id: 406, ServerRedirectedEmbedUri: null, …}
+2
+: 
+{PolicyArea: {…}, FileSystemObjectType: 0, Id: 776, ServerRedirectedEmbedUri: null, ServerRedirectedEmbedUrl: '', …}
+3
+: 
+{Policy_Owner: Array(2), PolicyArea: {…}, Policy_Delegate: Array(1), FileSystemObjectType: 0, Id: 71, …}
+4
+: 
+{Policy_Owner: Array(2), PolicyArea: {…}, FileSystemObjectType: 0, Id: 406, ServerRedirectedEmbedUri: null, …}
+5
+: 
+{Policy_Owner: Array(1), PolicyArea: {…}, FileSystemObjectType: 0, Id: 924, ServerRedirectedEmbedUri: null, …}
+================
 import { Version } from '@microsoft/sp-core-library';
 import { BaseClientSideWebPart, IPropertyPaneConfiguration } from '@microsoft/sp-webpart-base';
 import { escape } from '@microsoft/sp-lodash-subset';
