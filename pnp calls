@@ -1,3 +1,37 @@
+// Array of values to filter
+var arrayToFilter = [2, 4, 6, 8];
+
+// SharePoint list URL
+var listUrl = "/_api/web/lists/getbytitle('YourListTitle')/items";
+
+// Make a GET request to fetch all list items
+$.ajax({
+  url: listUrl,
+  method: "GET",
+  headers: {
+    "Accept": "application/json; odata=verbose",
+  },
+  success: function(data) {
+    // Array to store filtered items
+    var filteredItems = [];
+
+    // Iterate through the results to filter the items
+    data.d.results.forEach(function(item) {
+      if (arrayToFilter.includes(item.Id)) {
+        filteredItems.push(item);
+      }
+    });
+
+    // Process the filtered items as needed
+    console.log(filteredItems);
+  },
+  error: function(error) {
+    console.log("Error fetching SharePoint list items: " + JSON.stringify(error));
+  }
+});
+
+≈=≈=====
+
 import * as React from 'react';
 import { PolicySearchOM } from './PolicySearchOM';
 import { IPolicySearchProps } from './IPolicySearchProps';
