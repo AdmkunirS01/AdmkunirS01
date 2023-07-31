@@ -1,3 +1,100 @@
+
+import { Version } from '@microsoft/sp-core-library';
+import { BaseClientSideWebPart, IPropertyPaneConfiguration } from '@microsoft/sp-webpart-base';
+import { escape } from '@microsoft/sp-lodash-subset';
+
+import styles from './RemoveDuplicateIdsWebPart.module.scss';
+import * as strings from 'RemoveDuplicateIdsWebPartStrings';
+import { sp } from '@pnp/sp/presets/all';
+
+export interface IRemoveDuplicateIdsWebPartProps {
+  description: string;
+}
+
+export default class RemoveDuplicateIdsWebPart extends BaseClientSideWebPart<IRemoveDuplicateIdsWebPartProps> {
+
+  public render(): void {
+    this.domElement.innerHTML = `
+      <div class="${styles.removeDuplicateIds}">
+        <div class="${styles.container}">
+          <div class="${styles.row}">
+            <div class="${styles.column}">
+              <span class="${styles.title}">Remove Duplicate IDs</span>
+              <p class="${styles.subTitle}">Processing the SharePoint list data...</p>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    this.processSharePointListData();
+  }
+
+  private async processSharePointListData(): Promise<void> {
+    try {
+      // Initialize PnPjs with the current context
+      sp.setup({
+        spfxContext: this.context
+      });
+
+      // Fetch data from the SharePoint list
+      const listName = 'YourListName';
+      const listItems = await sp.web.lists.getByTitle(listName).items.select('Id').get();
+
+      // Process the data to remove duplicate IDs
+      const uniqueIds: number[] = [];
+      const duplicateIds: number[] = [];
+
+      listItems.forEach(item => {
+        if (uniqueIds.includes(item.Id)) {
+          duplicateIds.push(item.Id);
+        } else {
+          uniqueIds.push(item.Id);
+        }
+      });
+
+      // Update the SharePoint list with the updated IDs (optional)
+      // Uncomment the following lines to update the list with the unique IDs
+      // duplicateIds.forEach(async id => {
+      //   const item = await sp.web.lists.getByTitle(listName).items.getById(id).get();
+      //   await sp.web.lists.getByTitle(listName).items.getById(id).update({ Id: item.Id + '-updated' });
+      // });
+
+      // Display the result to the user
+      const resultMessage = `Found ${duplicateIds.length} duplicate IDs: ${duplicateIds.join(', ')}`;
+      this.domElement.querySelector(`.${styles.subTitle}`).textContent = resultMessage;
+    } catch (error) {
+      console.log('Error occurred:', error);
+      this.domElement.querySelector(`.${styles.subTitle}`).textContent = 'Error occurred while processing the data.';
+    }
+  }
+
+  protected get dataVersion(): Version {
+    return Version.parse('1.0');
+  }
+
+  protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
+    return {
+      pages: [
+        {
+          header: {
+            description: strings.PropertyPaneDescription
+          },
+          groups: [
+            {
+              groupName: strings.BasicGroupName,
+              groupFields: [
+                PropertyPaneTextField('description', {
+                  label: strings.DescriptionFieldLabel
+                })
+              ]
+            }
+          ]
+        }
+      ]
+    };
+  }
+}
+
+
 interface ListItem {
   ID: number;
   Title: string;
