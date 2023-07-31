@@ -1,3 +1,19 @@
+const dataArray = [
+  {Policy_Owner: Array(2), PolicyArea: {...}, Policy_Delegate: Array(1), FileSystemObjectType: 0, Id: 71, ...},
+  {Policy_Owner: Array(2), PolicyArea: {...}, FileSystemObjectType: 0, Id: 406, ServerRedirectedEmbedUri: null, ...},
+  {PolicyArea: {...}, FileSystemObjectType: 0, Id: 776, ServerRedirectedEmbedUri: null, ServerRedirectedEmbedUrl: '', ...},
+  {Policy_Owner: Array(2), PolicyArea: {...}, Policy_Delegate: Array(1), FileSystemObjectType: 0, Id: 71, ...},
+  {Policy_Owner: Array(2), PolicyArea: {...}, FileSystemObjectType: 0, Id: 406, ServerRedirectedEmbedUri: null, ...},
+  {Policy_Owner: Array(1), PolicyArea: {...}, FileSystemObjectType: 0, Id: 924, ServerRedirectedEmbedUri: null, ...}
+];
+
+const uniqueDataArray = dataArray.filter((item, index, self) =>
+  index === self.findIndex((t) => t.Id === item.Id)
+);
+
+console.log(uniqueDataArray);
+
+
 Array(6)
 0
 : 
