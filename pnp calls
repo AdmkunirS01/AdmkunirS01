@@ -1,3 +1,15 @@
+
+// SharePoint list IDs array with duplicates
+var sharePointListArray = [2, 4, 6, 8, 4, 8, 10, 12];
+
+// Create a Set object to remove duplicates
+var uniqueListIDs = new Set(sharePointListArray);
+
+// Convert the Set object back to an array
+var trimmedArray = Array.from(uniqueListIDs);
+
+console.log(trimmedArray);
+
 // Array of values to filter
 var arrayToFilter = [2, 4, 6, 8];
 
