@@ -1,3 +1,6 @@
+
+res.PolicySubSection && res.PolicySubSection.Policy_SubSection.toLowerCase().includes(this.keyword.toLowerCase());
+==================
 const dataArray = [
   {Policy_Owner: Array(2), PolicyArea: {...}, Policy_Delegate: Array(1), FileSystemObjectType: 0, Id: 71, ...},
   {Policy_Owner: Array(2), PolicyArea: {...}, FileSystemObjectType: 0, Id: 406, ServerRedirectedEmbedUri: null, ...},
