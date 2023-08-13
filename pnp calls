@@ -1,4 +1,36 @@
 
+
+ public componentDidMount(): void {
+      
+     $(".se-pre-con").css("display", "block");
+      this.getenterpricelistdata(this.props.userLanguage);
+   
+       // this.getenterpriceSearchedPolicies();
+        //this.getSOPdata();
+
+        var _this = this;
+        var locfilter = '';
+        if (_this.keyword != null)
+        {
+          
+            $("#searchBox").val(_this.keyword);
+        }
+        
+        _this.loadSection(this.props.userLanguage);
+        locfilter = `Language/Title eq '${this.props.userLanguage}'`;
+     sp.web.lists.getByTitle('Policies').items.select('*,Language/Title').expand('Language').filter(locfilter).getAll().then(data =>{
+            if(data != null)
+            {
+                _this.allPolicies = data;
+                if(_this.keyword != null && _this.keyword != "")
+                    _this.displaySearchedPolicies();
+
+            }
+        });
+        _this.AddEventListeners();
+
+    }
+    ======================
  var listName = '';
       var filter = '';
       if(language == 'English')
