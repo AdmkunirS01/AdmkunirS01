@@ -1,4 +1,52 @@
+import React, { Component } from 'react';
+import $ from 'jquery'; // Import jQuery (if not already done)
+import { sp } from '@pnp/sp/presets/all'; // Import PnP JS Library for SharePoint
 
+class MyComponent extends Component {
+  componentDidMount() {
+    this.fetchData();
+    this.addEventListeners();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.userLanguage !== this.props.userLanguage) {
+      this.fetchData();
+    }
+  }
+
+  fetchData() {
+    $(".se-pre-con").css("display", "block");
+    const locfilter = `Language/Title eq '${this.props.userLanguage}'`;
+
+    sp.web.lists.getByTitle('Policies').items
+      .select('*,Language/Title')
+      .expand('Language')
+      .filter(locfilter)
+      .getAll()
+      .then(data => {
+        if (data != null) {
+          this.allPolicies = data;
+          if (this.keyword != null && this.keyword !== "") {
+            this.displaySearchedPolicies();
+          }
+          // Update UI or state with new data
+        }
+      });
+  }
+
+  addEventListeners() {
+    // Logic to add event listeners
+  }
+
+  render() {
+    return <div>Content goes here</div>;
+  }
+}
+
+export default MyComponent;
+
+
+========
 
  public componentDidMount(): void {
       
