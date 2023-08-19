@@ -1,3 +1,12 @@
+
+var policyIds=[924, 406, 406, 406, 406, 406, 406, 989, 84, 71, 71]
+
+enterpricedata.forEach(function(item) {
+                                             if ( policyIds.includes(item.Policy_ID)) {
+                                               filteredItems.push(item);
+                                             }
+                                           });
+===========
 import React, { Component } from 'react';
 import $ from 'jquery'; // Import jQuery (if not already done)
 import { sp } from '@pnp/sp/presets/all'; // Import PnP JS Library for SharePoint
