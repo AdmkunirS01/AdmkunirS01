@@ -1,4 +1,146 @@
- public async loadSearchResults(keyword, lang)
+
+public async loadTraining(keyword, lang) {
+        var listName = '';
+      var filter = '';
+      if(lang == 'English')
+        listName = 'Training';
+      else{
+        listName = 'TranslatedTraining';
+        filter = "Language eq '"+lang+"'";
+      }
+        var trainingData = [];
+        var policiesMatching = [];
+        await sp.web.lists.getByTitle(listName).items.filter(filter).orderBy("Training_Name", true).getAll().then(async (data) => {
+            trainingData = data.filter(d => {
+                if (d.Training_Name != null) {
+                    return d.Training_Name.trim().toLowerCase().indexOf(keyword) >= 0;
+                }
+            });
+            if (trainingData.length > 0) {
+                trainingData.forEach(e => {
+                    policiesMatching.push(e.Policy_ID.toString());
+                });
+            }
+        }).catch((err) => {
+            alert("Something went wrong. Please try after sometime");
+        });
+        console.log("Training Matching:" + policiesMatching);
+        return policiesMatching;
+
+    }
+
+    public async loadSupportingResources(keyword, lang) {
+        var listName = '';
+      var filter = '';
+      if(lang == 'English')
+        listName = 'SupportingResources';
+      else{
+        listName = 'TranslatedSupportingResources';
+        filter = "Language eq '"+lang+"'";
+      }
+        var srData = [];
+        var policiesMatching = [];
+        await sp.web.lists.getByTitle(listName).items.filter(filter).orderBy("Title", true).getAll().then(async (data) => {
+            srData = data.filter(d => {
+                if (d.Title != null) {
+                    return d.Title.trim().toLowerCase().indexOf(keyword) >= 0;
+                }
+            });
+            if (srData.length > 0) {
+                srData.forEach(e => {
+                    policiesMatching.push(e.Policy_ID.toString());
+                });
+            }
+        }).catch((err) => {
+            alert("Something went wrong. Please try after sometime");
+        });
+        console.log("SupportingResources Matching:" + policiesMatching);
+        return policiesMatching;
+
+    }
+
+    public async loadAcronyms(keyword, lang) {
+       var srData = [];
+        var policiesMatching = [];
+        await sp.web.lists.getByTitle('Acronyms').items.getAll().then(async (data) => {
+            srData = data.filter(d => {
+                    return ((d.Acronym || "").toLowerCase().indexOf(keyword) >= 0 || (d.Definition || "").toLowerCase().indexOf(keyword) > -1);
+            });
+            if (srData.length > 0) {
+                srData.forEach(e => {
+                    policiesMatching.push(e.Policy_ID.toString());
+                });
+            }
+        }).catch((err) => {
+            alert("Something went wrong. Please try after sometime");
+        });
+        console.log("SupportingResources Matching:" + policiesMatching);
+        return policiesMatching;
+
+    }
+
+    public async loadSOP(keyword, lang) {
+        var listName = '';
+      var filter = '';
+      if(lang == 'English')
+        listName = 'SOP';
+      else{
+        listName = 'TranslatedSOP';
+        filter = "Language eq '"+lang+"'";
+      }
+        var sopData = [];
+        var policiesMatching = [];
+        await sp.web.lists.getByTitle(listName).items.filter(filter).orderBy("Title", true).getAll().then(async (data) => {
+            sopData = data.filter(d => {
+                if (d.Title != null) {
+                    return d.Title.trim().toLowerCase().indexOf(keyword) >= 0;
+                }
+            });
+            if (sopData.length > 0) {
+                sopData.forEach(e => {
+                    policiesMatching.push(e.Policy_ID.toString());
+                });
+            }
+        }).catch((err) => {
+            alert("Something went wrong. Please try after sometime");
+        });
+        console.log("SOPs Matching:" + policiesMatching);
+        return policiesMatching;
+
+    }
+
+    public async loadRecommended(keyword, lang) {
+        var listName = '';
+      var filter = '';
+      if(lang == 'English')
+        listName = 'Recommended';
+      else{
+        listName = 'TranslatedRecommended';
+        filter = "Language eq '"+lang+"'";
+      }
+        var recomData = [];
+        var policiesMatching = [];
+        await sp.web.lists.getByTitle(listName).items.filter(filter).orderBy("Document_Name", true).getAll().then(async (data) => {
+            recomData = data.filter(d => {
+                if (d.Document_Name != null) {
+                    return d.Document_Name.trim().toLowerCase().indexOf(keyword) >= 0;
+                }
+            });
+            if (recomData.length > 0) {
+                recomData.forEach(e => {
+                    policiesMatching.push(e.Policy_ID.toString());
+                });
+            }
+        }).catch((err) => {
+            alert("Something went wrong. Please try after sometime");
+        });
+        console.log("Recommended Matching:" + policiesMatching);
+        return policiesMatching;
+
+    }
+
+====
+public async loadSearchResults(keyword, lang)
     {
         var _this = this;
       var searchedIds = [];
