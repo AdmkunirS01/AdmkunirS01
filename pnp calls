@@ -1,3 +1,231 @@
+function loadTraining(keyword, lang) {
+    var listName = '';
+    var filter = '';
+    if (lang == 'English')
+        listName = 'Training';
+    else {
+        listName = 'TranslatedTraining';
+        filter = "Language eq '" + lang + "'";
+    }
+    var trainingData = [];
+    var policiesMatching = [];
+
+    return $.ajax({
+        url: "https://your-sharepoint-site.com/_api/web/lists/getByTitle('" + listName + "')/items",
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json;odata=nometadata'
+        },
+        data: {
+            '$filter': filter,
+            '$orderby': 'Training_Name asc'
+        }
+    }).then(function (data) {
+        trainingData = data.value.filter(function (d) {
+            if (d.Training_Name != null) {
+                return d.Training_Name.trim().toLowerCase().indexOf(keyword) >= 0;
+            }
+        });
+        if (trainingData.length > 0) {
+            trainingData.forEach(function (e) {
+                policiesMatching.push(e.Policy_ID.toString());
+            });
+        }
+        console.log("Training Matching:" + policiesMatching);
+        return policiesMatching;
+    }).catch(function (err) {
+        alert("Something went wrong. Please try after some time");
+        return []; // Return an empty array or handle the error as needed
+    });
+}
+function loadSupportingResources(keyword, lang) {
+    var listName = '';
+    var filter = '';
+    if (lang == 'English')
+        listName = 'SupportingResources';
+    else {
+        listName = 'TranslatedSupportingResources';
+        filter = "Language eq '" + lang + "'";
+    }
+    var srData = [];
+    var policiesMatching = [];
+
+    return $.ajax({
+        url: "https://your-sharepoint-site.com/_api/web/lists/getByTitle('" + listName + "')/items",
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json;odata=nometadata'
+        },
+        data: {
+            '$filter': filter,
+            '$orderby': 'Title asc'
+        }
+    }).then(function (data) {
+        srData = data.value.filter(function (d) {
+            if (d.Title != null) {
+                return d.Title.trim().toLowerCase().indexOf(keyword) >= 0;
+            }
+        });
+        if (srData.length > 0) {
+            srData.forEach(function (e) {
+                policiesMatching.push(e.Policy_ID.toString());
+            });
+        }
+        console.log("SupportingResources Matching:" + policiesMatching);
+        return policiesMatching;
+    }).catch(function (err) {
+        alert("Something went wrong. Please try after some time");
+        return []; // Return an empty array or handle the error as needed
+    });
+}
+function loadAcronyms(keyword) {
+    var srData = [];
+    var policiesMatching = [];
+
+    return $.ajax({
+        url: "https://your-sharepoint-site.com/_api/web/lists/getByTitle('Acronyms')/items",
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json;odata=nometadata'
+        }
+    }).then(function (data) {
+        srData = data.value.filter(function (d) {
+            return ((d.Acronym || "").toLowerCase().indexOf(keyword) >= 0 || (d.Definition || "").toLowerCase().indexOf(keyword) > -1);
+        });
+        if (srData.length > 0) {
+            srData.forEach(function (e) {
+                policiesMatching.push(e.Policy_ID.toString());
+            });
+        }
+        console.log("SupportingResources Matching:" + policiesMatching);
+        return policiesMatching;
+    }).catch(function (err) {
+        alert("Something went wrong. Please try after some time");
+        return []; // Return an empty array or handle the error as needed
+    });
+}
+function loadSOP(keyword, lang) {
+    var listName = '';
+    var filter = '';
+    if (lang == 'English')
+        listName = 'SOP';
+    else {
+        listName = 'TranslatedSOP';
+        filter = "Language eq '" + lang + "'";
+    }
+    var sopData = [];
+    var policiesMatching = [];
+
+    return $.ajax({
+        url: "https://your-sharepoint-site.com/_api/web/lists/getByTitle('" + listName + "')/items",
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json;odata=nometadata'
+        },
+        data: {
+            '$filter': filter,
+            '$orderby': 'Title asc'
+        }
+    }).then(function (data) {
+        sopData = data.value.filter(function (d) {
+            if (d.Title != null) {
+                return d.Title.trim().toLowerCase().indexOf(keyword) >= 0;
+            }
+        });
+        if (sopData.length > 0) {
+            sopData.forEach(function (e) {
+                policiesMatching.push(e.Policy_ID.toString());
+            });
+        }
+        console.log("SOPs Matching:" + policiesMatching);
+        return policiesMatching;
+    }).catch(function (err) {
+        alert("Something went wrong. Please try after some time");
+        return []; // Return an empty array or handle the error as needed
+    });
+}
+function loadRecommended(keyword, lang) {
+    var listName = '';
+    var filter = '';
+    if (lang == 'English')
+        listName = 'Recommended';
+    else {
+        listName = 'TranslatedRecommended';
+        filter = "Language eq '" + lang + "'";
+    }
+    var recomData = [];
+    var policiesMatching = [];
+
+    return $.ajax({
+        url: "https://your-sharepoint-site.com/_api/web/lists/getByTitle('" + listName + "')/items",
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json;odata=nometadata'
+        },
+        data: {
+            '$filter': filter,
+            '$orderby': 'Document_Name asc'
+        }
+    }).then(function (data) {
+        recomData = data.value.filter(function (d) {
+            if (d.Document_Name != null) {
+                return d.Document_Name.trim().toLowerCase().indexOf(keyword) >= 0;
+            }
+        });
+        if (recomData.length > 0) {
+            recomData.forEach(function (e) {
+                policiesMatching.push(e.Policy_ID.toString());
+            });
+        }
+        console.log("Recommended Matching:" + policiesMatching);
+        return policiesMatching;
+    }).catch(function (err) {
+        alert("Something went wrong. Please try after some time");
+        return []; // Return an empty array or handle the error as needed
+    });
+}
+function loadSystems(keyword, lang) {
+    var listName = '';
+    var filter = '';
+    if (lang == 'English')
+        listName = 'Systems';
+    else {
+        listName = 'TranslatedSystems';
+        filter = "Language eq '" + lang + "'";
+    }
+    var systemsData = [];
+    var policiesMatching = [];
+
+    return $.ajax({
+        url: "https://your-sharepoint-site.com/_api/web/lists/getByTitle('" + listName + "')/items",
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json;odata=nometadata'
+        },
+        data: {
+            '$filter': filter,
+            '$orderby': 'Systems_Name asc'
+        }
+    }).then(function (data) {
+        systemsData = data.value.filter(function (d) {
+            if (d.Systems_Name != null) {
+                return d.Systems_Name.trim().toLowerCase().indexOf(keyword) >= 0;
+            }
+        });
+        if (systemsData.length > 0) {
+            systemsData.forEach(function (e) {
+                policiesMatching.push(e.Policy_ID.toString());
+            });
+        }
+        console.log("Systems matching:" + policiesMatching);
+        return policiesMatching;
+    }).catch(function (err) {
+        alert("Something went wrong. Please try after some time");
+        return []; // Return an empty array or handle the error as needed
+    });
+}
+
+=========================
 
 public async loadTraining(keyword, lang) {
         var listName = '';
