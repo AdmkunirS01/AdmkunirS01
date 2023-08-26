@@ -1,4 +1,80 @@
- public async loadSearchResults(keyword, lang)
+function loadSearchResults(keyword, lang) {
+    var searchedIds = [];
+    var listName = '';
+    var filter = '';
+    
+    if (lang == 'English')
+        listName = 'Policies';
+    else {
+        listName = 'TranslatedPolicies';
+        filter = "Language eq '" + lang + "'";
+    }
+
+    // Assuming your SharePoint site URL is 'https://your-sharepoint-site.com'
+    var apiUrl = "https://your-sharepoint-site.com/_api/web/lists/getByTitle('" + listName + "')/items?$top=5000&$filter=" + filter + "&$select=*,Policy_Owner/Title,Policy_Delegate/Title,PolicyArea/Title,PolicySubSection/Policy_SubSection&$expand=Policy_Owner,Policy_Delegate,PolicyArea,PolicySubSection";
+
+    $.ajax({
+        url: apiUrl,
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json;odata=nometadata'
+        },
+        success: function (data) {
+            for (var i = 1; i < data.value.length; i++) {
+                var policyArea = data.value[i].PolicyArea != null ? (data.value[i].PolicyArea.Title || "") : "";
+                policyArea = policyArea.toLowerCase();
+                var title = (data.value[i].Title || "").toLowerCase();
+                var polOverview = (data.value[i].Overview || "").toLowerCase();
+                var keywords = (data.value[i].Keywords || "").toLowerCase();
+                var riskAreas = (data.value[i].Risk_Domain || "").toLowerCase();
+                var policyType = (data.value[i].Policy_Type || "").toLowerCase();
+                var policySection = data.value[i].PolicySubSection != null ? (data.value[i].PolicySubSection.Policy_SubSection || "") : "";
+                policySection = policySection.toLowerCase();
+                var polNumber = (data.value[i].Policy_Number || "").toLowerCase();
+                var guiding = (data.value[i].Guiding_Principles || "").toLowerCase();
+                var country = (data.value[i].Geographic_Scope || "").toLowerCase();
+                var div = (data.value[i].Enterprise_Division_BU_Scope || "").toLowerCase();
+                var sponsoring = (data.value[i].Policy_Sponsoring_Division || "").toLowerCase();
+                var reviewer = (data.value[i].Divisional_Reviewer || "").toLowerCase();
+                var contact = (data.value[i].PolicyContact_Email || "").toLowerCase();
+                var owner = data.value[i].Policy_Owner;
+                var ownerString = "";
+                var delegate = data.value[i].Policy_Delegate;
+                var delegateString = "";
+
+                if (owner != null) {
+                    owner.forEach(function (element) {
+                        ownerString += element.Title + ";";
+                    });
+                }
+                if (delegate != null) {
+                    delegate.forEach(function (element) {
+                        delegateString += element.Title + ";";
+                    });
+                }
+                if (title.indexOf(keyword) > -1 || polOverview.indexOf(keyword) > -1 || keywords.indexOf(keyword) > -1)
+                    searchedIds.push(lang == 'English' ? data.value[i].Id.toString() : data.value[i].Policy_ID.toString());
+                else if (policyArea.indexOf(keyword) > -1 || riskAreas.indexOf(keyword) > -1 || policyType.indexOf(keyword) > -1)
+                    searchedIds.push(lang == 'English' ? data.value[i].Id.toString() : data.value[i].Policy_ID.toString());
+                else if (policySection.indexOf(keyword) > -1 || polNumber.indexOf(keyword) > -1 || guiding.indexOf(keyword) > -1)
+                    searchedIds.push(lang == 'English' ? data.value[i].Id.toString() : data.value[i].Policy_ID.toString());
+                else if (country.indexOf(keyword) > -1 || div.indexOf(keyword) > -1 || sponsoring.indexOf(keyword) > -1 || contact.indexOf(keyword) > -1)
+                    searchedIds.push(lang == 'English' ? data.value[i].Id.toString() : data.value[i].Policy_ID.toString());
+                else if (ownerString.toLowerCase().indexOf(keyword) > -1 || delegateString.toLowerCase().indexOf(keyword) > -1)
+                    searchedIds.push(lang == 'English' ? data.value[i].Id.toString() : data.value[i].Policy_ID.toString());
+                else if (reviewer.indexOf(keyword) > -1)
+                    searchedIds.push(lang == 'English' ? data.value[i].Id.toString() : data.value[i].Policy_ID.toString());
+            }
+            resolve(searchedIds);
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
+}
+
+===============
+public async loadSearchResults(keyword, lang)
     {
         var _this = this;
       var searchedIds = [];
