@@ -1,4 +1,53 @@
- var _this = this;
+var _this = this;
+var searchedIds = [];
+
+return new Promise<any>((resolve, reject) => {
+    // Replace the SharePoint search with jQuery Ajax
+    $.ajax({
+        url: "_api/search/query?querytext=" + _this.keyword + " path:https://pfizer.sharepoint.com/sites/PolicyPoint-UAT/Policy%20Documents/*" + "&rowlimit=" + _this.count + "&startrow=" + _this.setRow + "&selectproperties=RefinableInt00,RefinableString00&trimduplicates=false",
+        method: "GET",
+        headers: {
+            "Accept": "application/json; odata=nometadata"
+        },
+        success: function (data) {
+            console.log("Data", data);
+            var primarySearchResults = data.PrimaryQueryResult.RelevantResults.Table.Rows.results;
+            for (var j = 0; j < primarySearchResults.length; j++) {
+                var ids = primarySearchResults[j].Cells.results.find(function (cell) { return cell.Key === 'RefinableInt00'; }).Value;
+                var docType = primarySearchResults[j].Cells.results.find(function (cell) { return cell.Key === 'RefinableString00'; }).Value;
+                if (ids != "") {
+                    searchedIds.push(parseInt(ids));
+                }
+                _this.setRow += 1;
+                console.log("ids", searchedIds);
+            }
+
+            if (primarySearchResults.length < _this.count) {
+                // Replace this with your own logic
+                // var result = this.getenterpricelistdata(this.props.userLanguage, this.keyword);
+                // result.then(data => {
+                //     searchedIds = searchedIds.concat(data);
+                //     resolve(searchedIds);
+                // });
+            } else {
+                // Replace this with your own logic
+                // var result1 = this.getenterpriceSearchedPolicies();
+                // result1.then(function (data) {
+                //     searchedIds = searchedIds.concat(data);
+                //     resolve(searchedIds);
+                // });
+            }
+            _this.poldoc.push(searchedIds);
+            resolve(searchedIds);
+        },
+        error: function (error) {
+            reject(error);
+        }
+    });
+});
+
+============
+var _this = this;
           var searchedIds = [];
           //var siteUrl1="https://pfizer.sharepoint.com/sites/PolicyPoint-UAT/CauCar"
           return new Promise<any>((resolve, reject) =>
