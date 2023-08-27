@@ -1,4 +1,75 @@
+var listName = '';
+var filter = '';
+if (lang == 'English') {
+    listName = 'Policies';
+    filter = "Status ne 'Retired'";
+} else {
+    listName = 'TranslatedPolicies';
+    filter = "Status ne 'Retired' and Language eq '" + lang + "'";
+}
 
+$.ajax({
+    url: "_api/web/lists/getByTitle('" + listName + "')/items?$filter=" + filter + "&$select=*,PolicyArea/Title&$expand=PolicyArea&$orderby=Title desc&$top=5000",
+    method: "GET",
+    headers: {
+        "Accept": "application/json; odata=verbose"
+    },
+    success: function(data) {
+        var primaryPolicies = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
+        var rankedPolicies = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
+        var selectedPolicies = [];
+
+        // Assuming you have defined 'searchResult' elsewhere
+        searchResult.then(async function(searched) {
+            for (var i = 0; i < data.d.results.length; i++) {
+                var flag = false;
+                var divisions = data.d.results[i].Enterprise_Division_BU_Scope != null ? data.d.results[i].Enterprise_Division_BU_Scope.split(";") : [];
+                var countries = data.d.results[i].Geographic_Scope || "NO_REGION";
+                var policyArea = data.d.results[i].PolicyArea != null ? (data.d.results[i].PolicyArea.Title || "") : "";
+                policyArea = policyArea.toLowerCase();
+                var title = (data.d.results[i].Title || "").toLowerCase();
+
+                if (searched.indexOf(lang == 'English' ? data.d.results[i].Id.toString() : data.d.results[i].Policy_ID.toString()) > -1) {
+                    if (policyArea.indexOf(keyToSearch) > -1) {
+                        // Rest of your code here...
+                    } else {
+                        // Rest of your code here...
+                    }
+                }
+            }
+
+            rankedPolicies.forEach(rank => {
+                selectedPolicies = selectedPolicies.concat(rank);
+            });
+
+            // Rest of your code...
+
+            $.each(rankingPolicies, function(i, element) {
+                count += 1;
+                var idValue = '';
+                if (lang == 'English') {
+                    idValue = element.Id;
+                } else {
+                    idValue = element.Policy_ID;
+                }
+
+                // Rest of your code...
+
+                results.push(item);
+                // Rest of your code...
+            });
+
+            // Rest of your code...
+
+            $(".se-pre-con").css("display", "none");
+        });
+    },
+    error: function(error) {
+        // Handle error
+    }
+});
+
+=============
   var listName = '';
         var filter = '';
         if (lang == 'English') {
