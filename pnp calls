@@ -1,3 +1,233 @@
+
+  var listName = '';
+        var filter = '';
+        if (lang == 'English') {
+            listName = 'Policies';
+            filter = "Status ne 'Retired'";
+        }
+        else {
+            listName = 'TranslatedPolicies';
+            filter = "Status ne 'Retired' and Language eq '" + lang + "'";
+        }
+        _this.allPolicies = sp.web.lists.getByTitle(listName).items.filter(filter)
+            .select("*,PolicyArea/Title")
+            .expand("PolicyArea").orderBy('Title', true).top(5000).get();
+        _this.allPolicies.then(function (data) {
+            // data = data.sort((a, b) => (a.Title > b.Title) ? 1 : -1);  
+            var primaryPolicies = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
+            var rankedPolicies = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
+            var selectedPolicies = [];
+            //start- added by nimisha on 13-sept-2021- translation
+            searchResult.then(async function (searched) {
+                //await searched.map(String);
+                //end- added by nimisha on 13-sept-2021- translation
+                for (var i = 0; i < data.length; i++) {
+                    var flag = false;
+                    var divisions = data[i].Enterprise_Division_BU_Scope != null ? data[i].Enterprise_Division_BU_Scope.split(";") : [];
+                    var countries = data[i].Geographic_Scope || "NO_REGION";
+                    var policyArea = data[i].PolicyArea != null ? (data[i].PolicyArea.Title || "") : "";
+                    policyArea = policyArea.toLowerCase();
+                    var title = (data[i].Title || "").toLowerCase();
+                    if (searched.indexOf(lang == 'English' ? data[i].Id.toString() : data[i].Policy_ID.toString()) > -1) {
+                        if (policyArea.indexOf(keyToSearch) > -1) {
+
+                            if (divisions.indexOf(userDivision) > -1 && countries.indexOf(userCountry) > -1) {
+                                if (title.indexOf(keyToSearch) > -1)
+                                    rankedPolicies[0].push(data[i]);
+                                else
+                                    rankedPolicies[1].push(data[i]);
+                            }
+
+                            else if (countries.indexOf(userCountry) > -1 && divisions.indexOf("Enterprise") > -1) {
+                                if (title.indexOf(keyToSearch) > -1)
+                                    rankedPolicies[2].push(data[i]);
+                                else
+                                    rankedPolicies[3].push(data[i]);
+                            }
+
+                            else if (divisions.indexOf(userDivision) > -1 && countries.indexOf("Global") > -1) {
+                                if (title.indexOf(keyToSearch) > -1)
+                                    rankedPolicies[4].push(data[i]);
+                                else
+                                    rankedPolicies[5].push(data[i]);
+                            }
+
+                            else {
+                                if (divisions.indexOf("Enterprise") > -1 && countries.indexOf("Global") > -1 && title.indexOf(keyToSearch) > -1)
+                                    rankedPolicies[6].push(data[i]);
+                                else if (divisions.indexOf("Enterprise") > -1 && countries.indexOf("Global") > -1)
+                                    rankedPolicies[7].push(data[i]);
+                                else if (divisions.some(item => userInterest.indexOf(item) > -1) && title.indexOf(keyToSearch) > -1)
+                                    rankedPolicies[8].push(data[i]);
+                                else if (divisions.some(item => userInterest.indexOf(item) > -1))
+                                    rankedPolicies[9].push(data[i]);
+                                else if (title.indexOf(keyToSearch) > -1)
+                                    rankedPolicies[10].push(data[i]);
+                                else
+                                    rankedPolicies[11].push(data[i]);
+                            }
+
+                        }
+                        else {
+                            if (divisions.indexOf(userDivision) > -1 && countries.indexOf(userCountry) > -1) {
+                                if (title.indexOf(keyToSearch) > -1)
+                                    rankedPolicies[12].push(data[i]);
+                                else
+                                    rankedPolicies[13].push(data[i]);
+                            }
+
+                            else if (countries.indexOf(userCountry) > -1 && divisions.indexOf("Enterprise") > -1) {
+                                if (title.indexOf(keyToSearch) > -1)
+                                    rankedPolicies[14].push(data[i]);
+                                else
+                                    rankedPolicies[15].push(data[i]);
+                            }
+
+                            else if (divisions.indexOf(userDivision) > -1 && countries.indexOf("Global") > -1) {
+                                if (title.indexOf(keyToSearch) > -1)
+                                    rankedPolicies[16].push(data[i]);
+                                else
+                                    rankedPolicies[17].push(data[i]);
+                            }
+
+                            else {
+                                if (divisions.indexOf("Enterprise") > -1 && countries.indexOf("Global") > -1 && title.indexOf(keyToSearch) > -1)
+                                    rankedPolicies[18].push(data[i]);
+                                else if (divisions.indexOf("Enterprise") > -1 && countries.indexOf("Global") > -1)
+                                    rankedPolicies[19].push(data[i]);
+                                else if (divisions.some(item => userInterest.indexOf(item) > -1) && title.indexOf(keyToSearch) > -1)
+                                    rankedPolicies[20].push(data[i]);
+                                else if (divisions.some(item => userInterest.indexOf(item) > -1))
+                                    rankedPolicies[21].push(data[i]);
+                                else if (title.indexOf(keyToSearch) > -1)
+                                    rankedPolicies[22].push(data[i]);
+                                else
+                                    rankedPolicies[23].push(data[i]);
+                            }
+
+                        }
+                    }
+                }
+
+                rankedPolicies.forEach(rank => {
+                    selectedPolicies = selectedPolicies.concat(rank);
+                });
+                var titleArrSpace = []; var titleArr = []; var overviewArr = []; var KeywordsArr = []; var otherArr = [];
+                var pattern = new RegExp("(<=\\s|\\b)" + keyToSearch + "(?=[!@#$%^&*]|\\b|\\s|$)");
+                selectedPolicies.forEach(item => {
+                    var title = (item.Title || "").toLowerCase();
+                    var polOverview = (item.Overview || "").toLowerCase();
+                    var keywords = (item.Keywords || "").toLowerCase();
+
+                    if (pattern.test(title))
+                        titleArrSpace.push(item);
+                    else if (title.indexOf(keyToSearch) > -1)
+                        titleArr.push(item);
+                    else if (polOverview.indexOf(keyToSearch) > -1)
+                        overviewArr.push(item);
+                    else if (keywords.indexOf(keyToSearch) > -1)
+                        KeywordsArr.push(item);
+                    else
+                        otherArr.push(item);
+
+                });
+                //console.log(titleArr,overviewArr,KeywordsArr,otherArr);
+                var rankingPolicies = [];
+                rankingPolicies = titleArrSpace.concat(titleArr).concat(overviewArr).concat(KeywordsArr).concat(otherArr);
+                //console.log(rankingPolicies);
+                var results = [];
+                for (var i = 0; i < rankingPolicies.length; i++) {
+                    var element = rankingPolicies[i];
+                    count += 1;
+                    //  var link = window.location.href.split('#')[0] + "#/ViewPolicy?id=" + element.Id;
+                    var idValue = '';
+                    if (lang == 'English')
+                        idValue = element.Id;
+                    else
+                        idValue = element.Policy_ID;
+     if (element.External)
+                        link = element.Policy_Link;
+
+                    var title = /* lang == "English" ?  */element.Title /* : _this.state.translatedPName */;
+                    var overview = /* lang == 'English' ?  */element.Overview != null ? element.Overview : "" /* : _this.state.translatedOverview != "" ? _this.state.translatedOverview : "" */;
+                    var overviewAll = /* lang == 'English' ?  */element.Overview != null ? element.Overview : "" /* : _this.state.translatedOverview != "" ? _this.state.translatedOverview : "" */;
+
+
+
+                    overview = overview.length > 180 ? overview.substring(0, 177) + "..." : overview;
+                    //end- added by nimisha on 13-sept-2021- translation             
+
+                    var scope = element.Geographic_Scope != null ? element.Geographic_Scope : "";
+                    var scopeAll = scope.split(";").join(", ");
+                    var division = element.Enterprise_Division_BU_Scope != null ? element.Enterprise_Division_BU_Scope : "";
+                    var divisionAll = division.split(";").join(";");
+                    var sponsoringAll = element.Policy_Sponsoring_Division != null ? element.Policy_Sponsoring_Division : "";
+                    var policyNumber = element.Policy_Number != null ? element.Policy_Number : "";
+                    var lastUpdated = "";
+                    var lastUpdatedSort = "";
+                    if (element.Last_Updated != null && element.Last_Updated != "") {
+                        var d = element.Last_Updated.split('T')[0].split("-");
+                        lastUpdated = d[1] + "/" + d[2] + "/" + d[0];
+                        lastUpdatedSort = d.join("-");
+                    }
+                    var modified = element.Modified;
+                    var policyContact = element.PolicyContact_Email || "";
+
+                    var linkname = { "sc:linkname": 'search|policy|' + (element.Title || "") };
+                    var attr = {
+                        'sc:pf-data':
+                        {
+                            "pfAnalyticsAttrData": {
+                                "pfContentLiked": {
+                                    "contentTitle": element.Title || "",//Title of the liked content, could be same as Interaction Name                
+                                    "contentType": "bookmark", // page, article, video, document, policy section, etc.                 
+                                    "contentPlacement": "" // optional, could be tile, rail, banner, etc.                 
+                                }
+                            }
+                        }
+                    };
+                    var item = {
+                        Title: title,
+                        Id: lang == 'English' ? element.Id : element.Policy_ID,
+                        Overview: overview,
+                        OverviewAll: overviewAll,
+                        PolicyNumber: policyNumber,
+                        ScopeAll: scopeAll,
+                        DivisionAll: divisionAll,
+                        SponsoringDivisions: sponsoringAll,
+                        PolicyType: element.Policy_Type || "",
+                        PolicySubSection: element.PolicySubSectionId || 0,
+                        Link: link,
+                        LastUpdated: lastUpdated,
+                        LastUpdatedSort: lastUpdatedSort,
+                        Modified: modified,
+                        Bookmarked: _this.objBookmark.userBookmarkedPolicies.indexOf(lang == 'English' ? element.Id.toString() : element.Policy_ID.toString()) > -1,
+                        Subscribed: _this.objSupscription.userSubscriptionPolicies.indexOf(lang == 'English' ? element.Id.toString() : element.Policy_ID.toString()) > -1,
+                        External: element.External,
+                        New: ((element.IsMajorUpdate == "Yes" || element.External == true) && element.Modified >= dateToSearch),
+                        LinkName: linkname,
+                        Attr: attr,
+                        PolicyContact: policyContact
+                    };
+                    results.push(item);
+                    _this.highlightText($("#searchBox").val());
+                }
+                _this.setState({
+                    ..._this.state,
+                    policies: results,
+                    policiesData: results,
+                    searched: true,
+                    //languageChanged: false
+                }, () => _this.highlightText(queryString));
+                _this.highlightText($("#searchBox").val())
+                _this.addSearchKeyword(results.length);
+                window["searchResultsTrack"](_this.keyword, count);
+                $(".se-pre-con").css("display", "none");
+            });
+
+
+        });
+====
 function loadTraining(keyword, lang) {
     var listName = '';
     var filter = '';
