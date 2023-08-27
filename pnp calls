@@ -42,6 +42,51 @@
             });
          });
         }
+======
+var _this = this;
+          var searchedIds = [];
+          //var siteUrl1="https://pfizer.sharepoint.com/sites/PolicyPoint-UAT/CauCar"
+          return new Promise<any>((resolve, reject) =>
+          {
+            
+            sp.search({Querytext : this.keyword+" path:https://pfizer.sharepoint.com/sites/PolicyPoint-UAT/Policy%20Documents/*", 
+            RowLimit:_this.count,
+            StartRow:_this.setRow,
+            SelectProperties: ["RefinableInt00","RefinableString00"],
+            TrimDuplicates: false
+            }).
+            then((p: SearchResults) => {
+                console.log("P",p)
+                for(var j=0 ; j <p.PrimarySearchResults.length ; j++)
+                {
+                    var ids = p.PrimarySearchResults[j]["RefinableInt00"];
+                    var docType = p.PrimarySearchResults[j]["RefinableString00"];
+                    if(ids != "")
+                        searchedIds.push(parseInt(ids));
+                    _this.setRow += 1;
+                    console.log("ids",searchedIds)
+                                   }
+                                
+                if(p.PrimarySearchResults.length < _this.count)
+                {
+                    var result = this.getenterpricelistdata(this.props.userLanguage,this.keyword);
+                    result.then(data => {
+                        searchedIds = searchedIds.concat(data);
+                        resolve(searchedIds);
+                                           });
+                }
+                else
+                {                   
+                    var result1 = this.getenterpriceSearchedPolicies();
+                    result1.then(function(data){
+                        searchedIds = searchedIds.concat(data);
+                        resolve(searchedIds);
+                                           });
+                }
+                this.poldoc.push(searchedIds)
+            });
+         });
+        }
 =================
 var listName = '';
 var filter = '';
