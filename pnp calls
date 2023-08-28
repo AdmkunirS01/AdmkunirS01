@@ -1,3 +1,7 @@
+  var result = sp.web.lists.getByTitle('Users').items.
+                         filter(filter).
+                         get();
+======
 var _this = this;
 var searchedIds = [];
 
