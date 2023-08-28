@@ -1,4 +1,22 @@
-  var result = sp.web.lists.getByTitle('Users').items.
+
+$.ajax({
+    url: "_api/web/lists/getByTitle('Users')/items?$filter=" + filter,
+    method: "GET",
+    headers: {
+        "Accept": "application/json; odata=nometadata"
+    },
+    success: function(data) {
+        // Handle the retrieved data here
+        console.log(data);
+    },
+    error: function(error) {
+        // Handle errors here
+        console.log("Error: " + JSON.stringify(error));
+    }
+});
+
+==================
+var result = sp.web.lists.getByTitle('Users').items.
                          filter(filter).
                          get();
 ======
