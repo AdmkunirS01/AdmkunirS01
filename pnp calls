@@ -1,4 +1,45 @@
+# Define SharePoint site URL and library name
+$siteURL = "<siteURL>"
+$libraryName = "<libraryName>"
 
+# Define status column and desired status value
+$statusColumn = "<statusColumn>"
+$desiredStatusValue = "<desiredStatusValue>"
+
+# Set SharePoint credentials
+$username = "<username>"
+$password = ConvertTo-SecureString "<password>" -AsPlainText -Force
+$credentials = New-Object System.Management.Automation.PSCredential($username, $password)
+
+# Define REST API URL for retrieving items with specific status
+$restURL = "$siteURL/_api/web/lists/getbytitle('$libraryName')/items?$filter=$statusColumn eq '$desiredStatusValue'"
+
+# Make a GET request to SharePoint REST API
+$response = Invoke-WebRequest -Uri $restURL -Method Get -Credential $credentials -UseDefaultCredentials
+
+# Convert the JSON response to PowerShell objects
+$items = $response | ConvertFrom-Json
+$files = $items.d.results
+
+# Specify local path for saving documents
+$localPath = "C:\Path\To\Save\Documents"
+
+# Create local directory if it doesn't exist
+New-Item -ItemType Directory -Path $localPath -ErrorAction SilentlyContinue
+
+# Download documents
+foreach ($file in $files) {
+    $fileUrl = $file.File.ServerRelativeUrl
+    $localFilePath = Join-Path $localPath $file.File.Name
+    $webClient = New-Object System.Net.WebClient
+    $webClient.Credentials = $credentials
+    $webClient.DownloadFile("$siteURL/$fileUrl", $localFilePath)
+    Write-Host "Downloaded $($file.File.Name)"
+}
+
+
+
+≈========
 $.ajax({
     url: "_api/web/lists/getByTitle('Users')/items?$filter=" + filter,
     method: "GET",
