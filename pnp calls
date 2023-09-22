@@ -1,3 +1,63 @@
+
+
+
+ var data = [];
+    sp.web.lists.getByTitle('OnboardedMarkets').items.getAll()
+        .then((res) => {
+            let filterOnBoardedMarket = [];
+            let getOnlyMarketsName = [];
+            if (res.length > 0) {
+                filterOnBoardedMarket = res.filter((result) => result.Status === "Onboarded");
+                filterOnBoardedMarket.map((res) => {
+                    if (res.Market.includes("/")) {
+                        getOnlyMarketsName.push(res.Market.substring(0, res.Market.lastIndexOf('/') + 1).replace("/", ""));
+                    } else {
+                        getOnlyMarketsName.push(res.Market.replace(/\s+/g, ''));
+                    }
+                });
+                //getOnlyMarketsName=["Japan","Gulf"];
+                getOnlyMarketsName.map((d) => {
+                   
+                    let siteurl = `https://pfizer.sharepoint.com/sites/PolicyPoint-UAT/${d}`;
+                    console.log(siteurl, "siteurl")
+                    let resulturl = "";
+                    let filter = `Language/Title eq '${userLanguage}'`;
+                    if(this.state.localLanguageFlag == "false"){
+                    resulturl = siteurl.concat("/_api/web/lists/getByTitle('Policies')/items?$select=*&$top=5000");
+                    }
+                    else{
+                        resulturl = siteurl.concat(`/_api/web/lists/getByTitle('Policies')/items?$select=*,Language/Title&$expand=Language&$&$filter=${filter}&$top=5000`);
+
+                    }
+                    this.props.context.spHttpClient.get(resulturl, SPHttpClient.configurations.v1)
+                        .then((res: SPHttpClientResponse) => {
+                            if (res.ok) {
+                                res.json().then((result: any) => {
+                                    // let data = [...this.state.localMarketsData];
+                                    if (result != null) {
+                                        
+                                       let data ={country :d , value:result.value} ;
+                                        console.log(data, "bbb");
+                                        if(data.value.length>0)
+                                        {this.allMarketPolicyList.push(data);}
+                                }
+
+                                })
+                            }
+                        })
+                })
+                // this.setState({ onBoardedMarketsList: [getOnlyMarketsName] });
+                 console.log(this.allMarketPolicyList,"market") ;
+                this.setState({ onBoardedMarketsList: this.allMarketPolicyList });
+            }
+        })
+        .catch(err => console.log(err));
+
+
+}
+
+=============
+
 # Define SharePoint site URL and library name
 $siteURL = "<siteURL>"
 $libraryName = "<libraryName>"
