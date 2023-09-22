@@ -1,6 +1,160 @@
+public loadSearchedLocalPolicies(keyword,siteUrl)
 
+    {
 
+      var _this = this;
 
+      var searchedIds = {};
+
+      return new Promise<any>((resolve, reject) =>
+
+      {
+
+       
+
+        sp.search({Querytext : keyword+" path:"+siteUrl+"/Policy%20Documents",
+
+        RowLimit:_this.count,
+
+        StartRow:_this.setRow,
+
+        TrimDuplicates: false,
+
+        SelectProperties : ["ListItemID","DefaultEncodingURL"],
+
+        }).
+
+        then((p: SearchResults) => {
+
+           
+
+            for(var j=0 ; j <p.PrimarySearchResults.length ; j++)
+
+            {
+
+                var ids = p.PrimarySearchResults[j]["ListItemID"];
+
+                if(ids != "")
+
+                    searchedIds[ids] = p.PrimarySearchResults[j]["DefaultEncodingURL"];
+
+                _this.setRow += 1;
+
+                console.log(searchedIds,"9999")
+
+            }
+
+           
+
+            if(p.PrimarySearchResults.length == _this.count)
+
+            {                  
+
+                var result = this.loadSearchedLocalPolicies(keyword,siteUrl);
+
+                result.then(function(data){
+
+                    searchedIds =  _this.extend(data, searchedIds);
+
+                    resolve(searchedIds);
+
+                   
+
+                   
+
+                });
+
+            }
+
+            else
+
+            {
+
+                resolve(searchedIds);
+
+            }
+
+        });
+
+     });
+
+     
+
+    }  
+
+ public searchLocalList(keyword,siteUrl)
+
+    {
+
+      var _this = this;
+
+      var searchedIds = [];
+
+      return new Promise<any>((resolve, reject) =>
+
+      {
+
+       
+
+        sp.search({Querytext : keyword+" path:"+siteUrl+"/Lists/Policies/",
+
+        RowLimit:_this.count,
+
+        StartRow:_this.setRow,
+
+        TrimDuplicates: false,
+
+        SelectProperties : ["ListItemID"],
+
+        }).
+
+        then((p: SearchResults) => {
+
+            for(var j=0 ; j <p.PrimarySearchResults.length ; j++)
+
+            {
+
+                var ids = p.PrimarySearchResults[j]["ListItemID"];
+
+                if(ids != "")
+
+                    searchedIds.push(parseInt(ids));
+
+                _this.setRow += 1;
+
+            }
+
+            if(p.PrimarySearchResults.length == _this.count)
+
+            {                  
+
+                var result = this.searchLocalList(keyword,siteUrl);
+
+                result.then(function(data){
+
+                    searchedIds = searchedIds.concat(data);
+
+                    resolve(searchedIds);
+
+                });
+
+            }
+
+            else
+
+            {
+
+                resolve(searchedIds);
+
+            }
+
+        });
+
+     });
+
+    }  
+
+==========================
  var data = [];
     sp.web.lists.getByTitle('OnboardedMarkets').items.getAll()
         .then((res) => {
