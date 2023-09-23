@@ -1,4 +1,25 @@
- public loadSearchedLocalPolicies(keyword,siteUrl)
+// Import the function from where it's defined
+import { loadSearchedLocalPolicies } from 'path-to-your-file';
+
+// Inside your component
+// ...
+
+// Assuming you're calling this function within a method or lifecycle hook
+someMethod() {
+  loadSearchedLocalPolicies(keyword, siteUrl)
+    .then(data => {
+      const { searchedIds, SPWebUrl } = data;
+      // Now you can use searchedIds and SPWebUrl in your component
+      // ...
+    })
+    .catch(error => {
+      // Handle errors if any
+    });
+}
+
+
+
+public loadSearchedLocalPolicies(keyword,siteUrl)
 
     {
 
