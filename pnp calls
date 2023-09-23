@@ -1,3 +1,15 @@
+public loadSearchedLocalPolicies(keyword, siteUrl) {
+  // ... (existing code)
+
+  return new Promise<any>((resolve, reject) => {
+    // ... (existing code)
+
+    // Assuming that SPWebUrl is an array
+    resolve({ searchedIds, SPWebUrl }); // Return both arrays
+  });
+}
+
+
 // Import the function from where it's defined
 import { loadSearchedLocalPolicies } from 'path-to-your-file';
 
