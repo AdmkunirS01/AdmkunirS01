@@ -1,3 +1,113 @@
+ public loadSearchedLocalPolicies(keyword,siteUrl)
+
+    {
+
+      var _this = this;
+
+      var searchedIds = [];
+
+      var docSearchList=[];
+
+      var SPWebUrl=[];
+
+ 
+
+      return new Promise<any>((resolve, reject) =>
+
+      {
+
+       
+
+        sp.search(<SearchQuery>{
+
+        Querytext: keyword,
+
+        RowLimit:_this.count,
+
+        StartRow:_this.setRow,
+
+        TrimDuplicates: false,
+
+        SelectProperties : ["ListItemId","DefaultEncodingURL","SPWebUrl"],
+
+        SourceId:'83817f38-03c1-425d-8b99-98cbcbce7cf7'
+
+        }).
+
+        then((p: SearchResults) => {
+
+            console.log(p,'abcd')
+
+           
+
+            for(var j=0 ; j <p.PrimarySearchResults.length ; j++)
+
+            {
+
+                var ids = p.PrimarySearchResults[j]["ListItemId"];
+
+               
+
+                console.log(SPWebUrl,'SPWebUrl')
+
+                if(ids != "")
+
+                SPWebUrl[ids] =p.PrimarySearchResults[j]["SPWebUrl"]
+
+                    searchedIds[ids] = p.PrimarySearchResults[j]["DefaultEncodingURL"];
+
+               
+
+                _this.setRow += 1;
+
+               
+
+            }
+
+            docSearchList=[...searchedIds,...SPWebUrl]
+
+            console.log(docSearchList,"9999")
+
+           
+
+            if(p.PrimarySearchResults.length == _this.count)
+
+            {                  
+
+                var result = this.loadSearchedLocalPolicies(keyword,siteUrl);
+
+                result.then(function(data){
+
+                    searchedIds =  _this.extend(data, searchedIds);
+
+                    resolve(searchedIds);
+
+                   
+
+                   
+
+                });
+
+            }
+
+            else
+
+            {
+
+                resolve(searchedIds);
+
+            }
+
+        });
+
+     });
+
+     
+
+    }  
+
+============
+
 public loadSearchedLocalPolicies(keyword,siteUrl)
 
     {
