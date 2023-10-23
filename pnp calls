@@ -1,3 +1,190 @@
+function GetSubCategories(){
+		 
+    $.ajax({  
+        url:  _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('Subcategories')/items?$select=Title,Id,MandetorySubcategory,Category/Title,Category/Id&$filter=Active eq 1&$orderBy=SortOrder&$expand=Category"+"",  
+        headers: {  
+            "Access-Control-Allow-Origin":"*",
+            "Accept": "application/json"  
+        },  
+        async: false,  
+        success: function (data) {  
+            console.log(data);
+           SubCategories=data.value;
+            console.log(SubCategories,"==>");
+
+                        
+		},  
+        eror: function (data) {  
+            alert("An error occurred. Please try again.");  
+            CreateErrorLog('Subcategories',data);
+        }  
+    });  
+	
+}
+ function SubmitEffortDetails(param) {
+     $(".se-pre-con").css("display", "block");  
+   
+ if(validateValues() ==false || validateHours()== false){
+ if(validateValues() ==false){
+ if(flag2==false){
+ 	alert("Category and Total % are mandatory.");
+ 	$(".se-pre-con").css("display", "none");
+ 	}
+ 	else{
+ 	alert("Category and Total % and Sub-Category are mandatory.");
+ 	$(".se-pre-con").css("display", "none"); 
+ 	} 
+ }
+ 
+
+ else if(validateHours()== false){
+ alert("Total (%) should not exceed " + _totalEffortLimit+".");
+ $(".se-pre-con").css("display", "none"); 
+
+ }
+ return;
+ }
+ 
+ else{
+ if(checkFormattedHours(valuesId) == false){
+ alert("Please submit entries in 5% intervals.");
+ $(".se-pre-con").css("display", "none"); 
+ return;
+ }
+ if(param == "Submitted"){
+ if(confirm("Do you want to submit the entries? ") == false){
+ $(".se-pre-con").css("display", "none"); 
+ return;
+ }
+ }
+
+ var noDays=moment($("#fromdate").val()).format('d');
+
+   var nextDay=$("#fromdate").val();
+   noDays=parseInt(noDays,10);
+  
+  // for sunday.
+  
+  if(noDays==0){
+  
+  nextDay= moment($("#fromdate").val()).add(1, "days");
+ nextDay= moment(nextDay).format("MM/DD/YY"); 
+
+  }
+//
+  else if(noDays<=6){
+  var n=6-noDays;
+  nextDay= moment($("#fromdate").val()).add(n+2, "days");
+ nextDay= moment(nextDay).format("MM/DD/YY");
+ 
+
+  }
+ 
+
+  else{
+  	nextDay= moment($("#fromdate").val()).add(6, "days");
+ 	nextDay= moment(nextDay).format("MM/DD/YY");
+
+  
+  }
+ var today = moment(nextDay).format("YYYY-MM-DD");
+var currentDate = today+'T00:00:00.000Z';
+//changes added on-12-4-2023-nimisha
+var dayprevious = moment(nextDay).add(-1,'days');
+var dayprevious2= moment(dayprevious).format("YYYY-MM-DD");
+dayprevious2=dayprevious2+'T00:00:00.000Z';
+var day2  = moment(nextDay).add(1,'days');
+var day3= moment(day2).format("YYYY-MM-DD");
+var daynext=day3+'T00:00:00.000Z';
+//end
+console.log(currentDate);
+var listName="EffortTrackingList";
+ var itemType = GetItemTypeForListName("EffortTrackingList");
+
+ 
+for(var i=0;i<valuesId.length;i++){
+console.log($('#Item'+valuesId[i]).val());
+var ItemId=parseInt($('#Item'+valuesId[i]).val(),10);
+console.log(ItemId);
+console.log(currentDate); 
+if(ItemId == 0){
+    var item = {
+        "__metadata": { "type": itemType },
+        
+        "Status":param,
+        "CategoriesId":$('#drpCat'+valuesId[i]).val(),
+        "SubCategoriesId":($('#drpSubCat'+valuesId[i]).val() != "--select--")?$('#drpSubCat'+valuesId[i]).val():null,
+        "Effort":($('#hours'+valuesId[i]).val()== "")?0:parseInt($('#hours'+valuesId[i]).val(),10),
+        "UserId":_spPageContextInfo.userId,
+        "SubNCategoryId":($('#drpSubNCat'+valuesId[i]).val() != "--select--")?$('#drpSubNCat'+valuesId[i]).val():null,
+        "ManagerId":ManagerId,
+        "Week":currentDate 
+        
+    };
+
+    $.ajax({
+        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(item),
+        headers: {
+            "Accept": "application/json;odata=verbose",
+            "X-RequestDigest": $("#__REQUESTDIGEST").val()
+        },
+        success: function (data) {
+            console.log("1018",data);
+        },
+        error: function (data) {
+            //console.log(data);
+            CreateErrorLog(listName,data); 
+        }
+    });
+    
+    }
+    else{
+     var item = {
+        "__metadata": { "type": itemType },
+        
+        "Status":param,
+        "CategoriesId":$('#drpCat'+valuesId[i]).val(),
+        "SubCategoriesId":($('#drpSubCat'+valuesId[i]).val() != "--select--")?$('#drpSubCat'+valuesId[i]).val():null,
+        "Effort":($('#hours'+valuesId[i]).val()== "")?0:parseInt($('#hours'+valuesId[i]).val(),10),
+        "UserId":_spPageContextInfo.userId,
+        "SubNCategoryId":($('#drpSubNCat'+valuesId[i]).val() != "--select--")?$('#drpSubNCat'+valuesId[i]).val():null,
+        "ManagerId":ManagerId,
+        "Week":currentDate 
+                
+    };
+
+    $.ajax({
+        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById("+ItemId+")",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(item),
+        headers: {
+            "accept":"application/json;odata=verbose",
+			"content-type": "application/json;odata=verbose",
+			"X-RequestDigest":$("#__REQUESTDIGEST").val(),
+			"X-HTTP-Method": "MERGE",
+			"IF-MATCH":"*"      
+			  },
+        success: function (data) {
+            console.log("1055",data);
+        },
+        error: function (data) {
+            console.log(data);
+            CreateErrorLog(listName,data); 
+
+        }
+    });
+   
+    
+    }
+   
+
+}
+
+========================
 var Categories=[];
 var SubCategories=[];
 var SubNCategories=[];
