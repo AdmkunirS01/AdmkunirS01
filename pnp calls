@@ -1,4 +1,46 @@
+function AppendSubcategoriesDropdownWithValues(drpCatId, assignedValue) {
+    var categor = drpCatId;
+    console.log(categor);
+    var id = categor;
+    id = id.replace(/drpSubCat/, '');
+    console.log(id);
+    id = parseInt(id, 10);
 
+    $('#drpSubCat' + id).empty();
+    var cat = "<option>--select--</option>";
+
+    // Arrays for matched and unmatched IDs
+    var matchedIds = [];
+    var unmatchedIds = [];
+
+    for (var i = 0; i < SubCategories.length; i++) {
+        var valuedrp = assignedValue.Categories.Id;
+        if (valuedrp == SubCategories[i].Category.Id) {
+            cat += '<option value=' + SubCategories[i].Id + '>' + SubCategories[i].Title + '</option>';
+
+            // Compare SubCategories[i].Id and assignedValue.SubCategories.Id
+            if (assignedValue.SubCategories != null && SubCategories[i].Id == assignedValue.SubCategories.Id) {
+                matchedIds.push(SubCategories[i].Id);
+            }
+        }
+        else {
+            unmatchedIds.push(SubCategories[i].Id);
+        }
+    }
+
+    $('#drpSubCat' + id).append(cat);
+
+    //fixed category Id
+    if (assignedValue.SubCategories != null) {
+        let element = document.getElementById(drpCatId);
+        element.value = assignedValue.SubCategories.Id;
+    }
+
+    console.log("Matched IDs:", matchedIds);
+    console.log("Unmatched IDs:", unmatchedIds);
+}
+
+====
 function AppendSubcategoriesDropdownWithValues(drpCatId, assignedValue) {
     var categor = drpCatId;
     console.log(categor);
