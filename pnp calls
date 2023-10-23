@@ -1,3 +1,46 @@
+
+function AppendSubcategoriesDropdownWithValues(drpCatId, assignedValue) {
+    var categor = drpCatId;
+    console.log(categor);
+    var id = categor;
+    id = id.replace(/drpSubCat/, '');
+    console.log(id);
+    id = parseInt(id, 10);
+
+    $('#drpSubCat' + id).empty();
+    var cat = "<option>--select--</option>";
+
+    for (var i = 0; i < SubCategories.length; i++) {
+        var valuedrp = assignedValue.Categories.Id;
+        if (valuedrp == SubCategories[i].Category.Id) {
+            cat += '<option value=' + SubCategories[i].Id + '>' + SubCategories[i].Title + '</option>';
+        }
+    }
+
+    $('#drpSubCat' + id).append(cat);
+
+    // Fixed category Id
+    if (assignedValue.SubCategories != null) {
+        let element = document.getElementById(drpCatId);
+        element.value = assignedValue.SubCategories.Id;
+    }
+
+    // Compare SubCategories[i].Id and assignedValue.SubCategories.Id
+    if (assignedValue.SubCategories != null) {
+        var subCategoryId = assignedValue.SubCategories.Id;
+        for (var i = 0; i < SubCategories.length; i++) {
+            if (SubCategories[i].Id === subCategoryId) {
+                // Match found, do something with SubCategories[i]
+                console.log("Match found. Subcategory Title:", SubCategories[i].Title);
+                console.log("Match found. Subcategory ID:", SubCategories[i].Id);
+            }
+        }
+    } else {
+        // No match found
+        console.log("No match found for Subcategory ID:", subCategoryId);
+    }
+}
+
 =========
 function AppendSubcategoriesDropdownWithValues(drpCatId,assignedValue){
 var categor=drpCatId;
