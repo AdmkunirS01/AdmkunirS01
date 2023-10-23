@@ -1,3 +1,32 @@
+=========
+function AppendSubcategoriesDropdownWithValues(drpCatId,assignedValue){
+var categor=drpCatId;
+console.log(categor);
+var id = categor;
+   id = id.replace(/drpSubCat/, '');
+    console.log(id);
+    id=parseInt(id,10);
+  
+
+$('#drpSubCat'+id).empty();
+var cat="<option>--select--</option>";
+for(var i=0;i<SubCategories.length;i++){
+var valuedrp=assignedValue.Categories.Id;
+	if(valuedrp ==SubCategories[i].Category.Id){
+	cat+='<option value='+SubCategories[i].Id+'>'+SubCategories[i].Title+'</option>';
+	}
+}
+ $('#drpSubCat'+id).append(cat);
+ //fixed category Id
+ if(assignedValue.SubCategories!= null){
+
+ let element = document.getElementById(drpCatId);
+    element.value = assignedValue.SubCategories.Id;
+    }
+
+
+}
+
 function GetSubCategories(){
 		 
     $.ajax({  
