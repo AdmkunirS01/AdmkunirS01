@@ -1,3 +1,50 @@
+function AppendCatgeoriesDropdownWithValues(drpCatid, assignedValue) {
+    var cat = "";
+    for (var i = 0; i < Categories.length; i++) {
+        cat += '<option value=' + Categories[i].Id + '>' + Categories[i].Title + '</option>';
+    }
+    $('#' + drpCatid).append(cat);
+
+    let element = document.getElementById(drpCatid);
+    element.value = assignedValue.Categories.Id;
+    console.log("catassign", element.value)
+}
+
+function AppendSubcategoriesDropdownWithValues(drpCatId, assignedValue) {
+    var categor = drpCatId;
+    console.log(categor);
+    var id = categor;
+    id = id.replace(/drpSubCat/, '');
+    console.log(id);
+    id = parseInt(id, 10);
+
+    $('#drpSubCat' + id).empty();
+    var cat = "<option>--select--</option>";
+
+    // Array for matched and unmatched IDs
+    var allIds = [];
+
+    for (var i = 0; i < SubCategories.length; i++) {
+        var valuedrp = assignedValue.Categories.Id;
+        if (valuedrp == SubCategories[i].Category.Id) {
+            cat += '<option value=' + SubCategories[i].Id + '>' + SubCategories[i].Title + '</option>';
+            allIds.push(SubCategories[i].Id);
+        }
+    }
+
+    $('#drpSubCat' + id).append(cat);
+
+    // Fixed category Id
+    if (assignedValue.SubCategories != null) {
+        let element = document.getElementById(drpCatId);
+        element.value = assignedValue.SubCategories.Id;
+    }
+
+    console.log("All IDs:", allIds);
+}
+
+====================
+
 var Categories=[];
 var SubCategories=[];
 var SubNCategories=[];
