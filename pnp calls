@@ -1,3 +1,41 @@
+function AppendCatgeoriesDropdownWithValues(drpCatid, assignedValue){
+    var cat="";
+    for(var i=0; i<Categories.length; i++){
+        cat += '<option value=' + Categories[i].Id + '>' + Categories[i].Title + '</option>';
+    }
+    $('#' + drpCatid).append(cat);
+
+    let element = document.getElementById(drpCatid);
+    element.value = assignedValue.Categories.Id;
+    console.log("catassign", element.value);
+
+    // Retrieve matched and unmatched category IDs
+    var assignedCategoryId = assignedValue.Categories.Id;
+    var matchedCategoryIds = [];
+    var unmatchedCategoryIds = [];
+
+    for(var i = 0; i < Categories.length; i++){
+        if(Categories[i].Id === assignedCategoryId){
+            matchedCategoryIds.push(assignedCategoryId);
+        } else {
+            unmatchedCategoryIds.push(Categories[i].Id);
+        }
+    }
+
+    var resultArray = {
+        "AssignedValue": assignedCategoryId,
+        "MatchedCategoryIds": matchedCategoryIds,
+        "UnmatchedCategoryIds": unmatchedCategoryIds
+    };
+
+    console.log("Assigned Value:", assignedCategoryId);
+    console.log("Matched Category IDs:", matchedCategoryIds);
+    console.log("Unmatched Category IDs:", unmatchedCategoryIds);
+
+    return resultArray;
+}
+
+==========
 function AppendCatgeoriesDropdownWithValues(drpCatid, assignedValue) {
     var cat = "";
     for (var i = 0; i < Categories.length; i++) {
