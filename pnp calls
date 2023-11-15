@@ -1,3 +1,30 @@
+// Assume you have SharePoint list data in the variable 'sharePointListData'
+const sharePointListData = [
+  { id: 1, name: 'Item 1' },
+  { id: 7, name: 'Item 7' },
+  { id: 67, name: 'Item 67' },
+  // ... other items
+];
+
+const listIDs = [1, 7, 67, 56, 5, 6, 42];
+
+// Array to store matched SharePoint list data
+const matchedSharePointListData = [];
+
+// Compare SharePoint list data with array of IDs
+listIDs.forEach(id => {
+  const foundItem = sharePointListData.find(item => item.id === id);
+
+  if (foundItem) {
+    // Add the found item to the array of matched SharePoint list data
+    matchedSharePointListData.push(foundItem);
+  }
+});
+
+// Display matched SharePoint list data
+console.log("Matched SharePoint List Data:", matchedSharePointListData);
+
+=============
 const dummyData = [
   { id: 1, category: 'Category A', title: 'Title 1' },
   { id: 2, category: 'Category B', title: 'Title 2' },
