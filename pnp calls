@@ -9,6 +9,29 @@ const dummyData = [
 const data2 = [2, 3, 4];
 
 // Find indices of matching elements
+const matchingIndices = data2.map(id => {
+  const index = dummyData.findIndex(item => item.id === id);
+  return index !== -1 ? index : null; // return null for non-matching elements
+});
+
+// Display the matching indices
+console.log(matchingIndices);
+
+const filteredMatchingIndices = matchingIndices.filter(index => index !== null);
+console.log(filteredMatchingIndices);
+
+=============
+const dummyData = [
+  { id: 1, category: 'Category A', title: 'Title 1' },
+  { id: 2, category: 'Category B', title: 'Title 2' },
+  { id: 3, category: 'Category C', title: 'Title 3' },
+  { id: 4, category: 'Category A', title: 'Title 4' },
+  { id: 5, category: 'Category B', title: 'Title 5' }
+];
+
+const data2 = [2, 3, 4];
+
+// Find indices of matching elements
 const matchingIndices = data2.map(id => dummyData.findIndex(item => item.id === id));
 
 // Display the matching indices
