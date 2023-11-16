@@ -1,3 +1,15 @@
+============
+const allCategoryId = [18, 6, 2, 3, 4, 5, 1, 7, 8, 9, 19, 10, 11, 12, 13, 14, 15, 16];
+const extracat = [9, 1, 1, 1, 1, 2, 2, 2, 13, 3, 4, 4, 4, 5, 5, 5, 12, 12, 6, 8, 12, 8, 14, 12, 16, 12];
+
+// Convert arrays to sets for efficient comparison
+const allCategoryIdSet = new Set(allCategoryId);
+const extracatSet = new Set(extracat);
+
+// Find unmatched IDs
+const unmatchedIds = [...allCategoryIdSet].filter(id => !extracatSet.has(id));
+
+console.log("Unmatched IDs:", unmatchedIds);
 
 allCategorId=[18, 6, 2, 3, 4, 5, 1, 7, 8, 9, 19, 10, 11, 12, 13, 14, 15, 16]
 extracat=[9, 1, 1, 1, 1, 2, 2, 2, 13, 3, 4, 4, 4, 5, 5, 5, 12, 12, 6, 8, 12, 8, 14, 12, 16, 12]
