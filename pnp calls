@@ -1,3 +1,43 @@
+console.log("SubCategories1134", SubCategories);
+var unmatchedIds = allcatId.filter(id => !allselectedIds.includes(id.toString()));
+console.log("1137", unmatchedIds);
+
+// Assuming SubCategories is an array of objects with an 'Id' property
+var matchedSubCategories = SubCategories.filter(subCat => unmatchedIds.includes(subCat.Id.toString()));
+
+for (var i = 0; i < matchedSubCategories.length; i++) {
+    var matchedCategory = matchedSubCategories[i];
+
+    var item = {
+        "__metadata": { "type": itemType },
+        "Status": param,
+        "CategoriesId": matchedCategory.Id, // Use the matched SubCategories ID as CategoriesId
+        "SubCategoriesId": matchedCategory.Id, // Use the matched SubCategories ID as SubCategoriesId
+        "Effort": 0,
+        "UserId": _spPageContextInfo.userId,
+        "ManagerId": ManagerId,
+        "Week": currentDate
+    };
+
+    $.ajax({
+        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(item),
+        headers: {
+            "Accept": "application/json;odata=verbose",
+            "X-RequestDigest": $("#__REQUESTDIGEST").val()
+        },
+        success: function (data) {
+            console.log("1018", data);
+        },
+        error: function (data) {
+            CreateErrorLog(listName, data);
+        }
+    });
+}
+
+===========
 onsole.log("SubCategories1134", SubCategories);
 var unmatchedIds = allcatId.filter(id => !allselectedIds.includes(id.toString()));
   console.log("1137",unmatchedIds);
