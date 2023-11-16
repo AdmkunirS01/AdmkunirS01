@@ -1,4 +1,45 @@
-// Assume you have SharePoint list data in the variable 'sharePointListData'
+onsole.log("SubCategories1134", SubCategories);
+var unmatchedIds = allcatId.filter(id => !allselectedIds.includes(id.toString()));
+  console.log("1137",unmatchedIds);
+ 
+
+
+  for (var i = 0; i < unmatchedIds.length; i++) {
+    var allCategoriesId = unmatchedIds[i]; // Use the unmatched ID as CategoriesId
+
+    var item = {
+        "__metadata": { "type": itemType },
+        "Status": param,
+        "CategoriesId":allCategoriesId ,
+
+        "SubCategoriesId": allCategoriesId      ,
+        "Effort": 0,
+        "UserId": _spPageContextInfo.userId,
+        //"SubNCategoryId": ($('#drpSubNCat' + valuesId[i]).val() != "--select--") ? $('#drpSubNCat' + valuesId[i]).val() : null,
+        "ManagerId": ManagerId,
+        "Week": currentDate
+    };
+
+    $.ajax({
+        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(item),
+        headers: {
+            "Accept": "application/json;odata=verbose",
+            "X-RequestDigest": $("#__REQUESTDIGEST").val()
+        },
+        success: function (data) {
+            console.log("1018", data);
+        },
+        error: function (data) {
+            //console.log(data);
+            CreateErrorLog(listName, data);
+        }
+    });
+}
+
+==============// Assume you have SharePoint list data in the variable 'sharePointListData'
 const sharePointListData = [
   { id: 1, name: 'Item 1' },
   { id: 7, name: 'Item 7' },
