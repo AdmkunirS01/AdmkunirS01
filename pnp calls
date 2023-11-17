@@ -1,3 +1,38 @@
+var matchedCategories = Categories.filter(Cat =>unmatchedcatIds.includes(Cat.Id));
+
+for(var j = 0; j < matchedCategories.lenght; j++) {
+    var getCategoryid =matchedCategories[j];
+   
+
+    var item = {
+        "__metadata": { "type": itemType },
+        "Status": param,
+        "CategoriesId": getCategoryid.Id, // Use the matched SubCategories ID as CategoriesId
+        //"SubCategoriesId":SubCategories[i].Id, // Use the matched SubCategories ID as SubCategoriesId
+        "Effort": 0,
+        "UserId": _spPageContextInfo.userId,
+        "ManagerId": ManagerId,
+        "Week": currentDate
+    };
+
+    $.ajax({
+        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(item),
+        headers: {
+            "Accept": "application/json;odata=verbose",
+            "X-RequestDigest": $("#__REQUESTDIGEST").val()
+        },
+        success: function (data) {
+            console.log("1018", data);
+        },
+        error: function (data) {
+            CreateErrorLog(listName, data);
+        }
+    });
+}
+
 ============
 const allCategoryId = [18, 6, 2, 3, 4, 5, 1, 7, 8, 9, 19, 10, 11, 12, 13, 14, 15, 16];
 const extracat = [9, 1, 1, 1, 1, 2, 2, 2, 13, 3, 4, 4, 4, 5, 5, 5, 12, 12, 6, 8, 12, 8, 14, 12, 16, 12];
