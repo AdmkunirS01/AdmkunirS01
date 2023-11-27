@@ -1,3 +1,84 @@
+var filter = ""; 
+     urlList =  _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('EffortTrackingList')/items?$select=*,User/Title,User/ID,Categories/Title,Categories/Id,SubCategories/Title,SubCategories/Id,SubNCategory/Id,Manager/Id&$filter=UserId eq "+_spPageContextInfo.userId+" and Week ge datetime'" +currentDate+ "' and Week le datetime'" +nextDate+"'&$expand=Categories,SubCategories,SubNCategory,Manager,User"+"";
+		console.log(urlList); 
+		 var resultArray = [];
+            			//urlList = _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('RemediationTracker')/items";
+    $.ajax({
+        url: urlList,
+        type: "GET",
+        async: false,
+        headers: { "Accept": "application/json",
+               "Access-Control-Allow-Origin":"*" },
+        success: function (data) {
+        
+
+        console.log("1121",data);
+        if(data.value.length>0){
+        
+ 
+ 
+ 
+
+ 
+        AddRowWithValues(data.value)
+        if(data.value[0].Status == "Submitted"){
+        disableButtons();
+        ShowTotalHours();
+         
+        showRecallButton();
+        console.log("81items",data.value[0].Week)
+          
+        var today= new Date(data.value[0].Week);
+         var today1= new Date(today.getFullYear(),today.getMonth(),today.getDate()-today.getDay())
+         console.log("1225",today1)
+         const firstDayofWeek= new Date(today.getFullYear(),today.getMonth(),today.getDate()-today.getDay()-6);
+console.log("first",firstDayofWeek)
+
+const lastDayofWeek= new Date(today.getFullYear(),today.getMonth(),today.getDate()+(6-today.getDay()-6)); 
+console.log("last",lastDayofWeek)
+if(today1>=firstDayofWeek&&today1<=lastDayofWeek)
+{
+console.log("Today date current week");
+document.getElementById("notify").style.display = "none";
+
+} 
+       
+        }
+        else{
+        hideRecallButton();
+        EnableButtons();
+         ShowTotalHours();
+        }
+        }
+        else{
+        //For Fixed Category
+        //AddRow();
+        AddRowFixedCategory();
+        EnableButtons();
+         ShowTotalHours();
+          hideRecallButton();
+          console.log("this date not in current week");
+  document.getElementById("notify").style.display = "block";
+        }
+        //  $(".se-pre-con").css("display", "none");
+        setTimeout(function(){
+
+           $(".se-pre-con").css("display", "none");  
+   		},4000);
+  
+                   },
+        error: function (data) {
+        //alert('error');
+      //deferred.resolve(null);
+      	CreateErrorLog("EffortTrackingList",data); 
+
+        $(".se-pre-con").css("display", "none");  
+        }
+    });
+    console.log("FInalArray" + finalArray);
+	return finalArray;
+
+======
 var matchedCategories = Categories.filter(Cat =>unmatchedcatIds.includes(Cat.Id));
 
 for(var j = 0; j < matchedCategories.lenght; j++) {
