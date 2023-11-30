@@ -1,4 +1,20 @@
+var displayStyle = Values[i].Effort === 0 ? 'style="display: none;"' : '';
 
+var markup = 
+    '<tr class="row tableRow" id="tableRow'+id+'" style="text-align: center;" ' + displayStyle + '>'+
+    '<td><input id="timesheet'+id+'" type="checkbox" name="timesheet" /></td>'+
+    '<td id="catgs'+id+'"><select class="drpdwnClass" data-toggle="tooltip" title='+Values[i].Categories.Title.split(" ")+' id="drpCat'+id+'" onchange="AppendSubcategoriesDropdown(drpCat'+id+')" value='+Values[i].Categories.Id+' style="width: 95%;">'+
+    '<option>--select--</option></select></td><td>'+
+    '<select class="drpdwnClass" id="drpSubCat'+id+'" onchange="AppendSubNcategoriesDropdown(drpSubCat'+id+')"  style="width: 95%;">'+
+    '<option>--select--</option></select><span class="starcat'+id+'" style="color: red; font-size: 12">*</span> </td>'+
+    '<td style="display:none">'+
+    '<select class="drpdwnClass" id="drpSubNCat'+id+'" style="width: 95%;">'+
+    ' <option>--select--</option></select> </td> <td>'+
+    '<input id="hours'+id+'" type="text" value='+Values[i].Effort+' style="width: 130px;" onkeypress="return isNumber(event)" onchange="ShowTotalHours()"/> </td>'
+    +'<td style="display:none;"><input type="text" id="Item'+id+'" value="0"></span></td>'+
+    '</tr>';
+
+===================
 var markup = 
             '<tr class="row tableRow" id="tableRow'+id+'" style="text-align: center;">'+
            '<td><input id="timesheet'+id+'" type="checkbox" name="timesheet" /></td>'+
