@@ -1,3 +1,33 @@
+function AddRowFixedCategory(){
+var id = $('.tableRow').last().attr('id');
+   id =(id)? id.replace(/tableRow/, ''):"0";
+    console.log(id);
+    id=parseInt(id,10)+1;
+    valuesId.push(id);
+    console.log(valuesId);
+
+ var markup = 
+            '<tr class="row tableRow" id="tableRow'+id+'" style="text-align: center;">'+
+           '<td ><input name="timesheet" id="timesheet'+id+'" type="checkbox" /></td>'+
+            '<td id="catgs'+id+'"><select class="drpdwnClass" data-toggle="tooltip" title=' +fixedCategory.split(" ") +' id="drpCat'+id+'" onchange="AppendSubcategoriesDropdown(drpCat'+id+')" value='+fixedCategoryId+' style="width: 95%;">'+
+              '<option>--select--</option></select></td><td>'+
+            '<select class="drpdwnClass" id="drpSubCat'+id+'" onchange="AppendSubNcategoriesDropdown(drpSubCat'+id+')"  style="width: 95%;">'+
+             '<option>--select--</option></select><span class="starcat'+id+'" style="color: red; font-size: 12">*</span> </td>'+
+                  '<td style="display:none">'+
+            '<select class="drpdwnClass" id="drpSubNCat'+id+'" style="width: 95%;">'+
+            ' <option>--select--</option></select> </td> <td>'+
+            '<input id="hours'+id+'" type="text" style="width: 130px;" onkeypress="return isNumber(event)" onchange="ShowTotalHours()" value="'+fixedCategoryDefaultValue+'"/> </td>'
+            +'<td style="display:none;"><input type="text" id="Item'+id+'" value="0"></span></td>'+
+            '</tr>';
+             
+            $("#effortBody").append(markup);
+           $(".starcat"+id).css('display', 'none');
+          
+            AppendCatgeoriesDropdownWithFixedCategoryValues("drpCat"+id,fixedCategoryId);
+            
+              
+        }
+===================
 var displayStyle = Values[i].Effort === 0 ? 'style="display: none;"' : '';
 
 var markup = 
