@@ -1,4 +1,41 @@
 
+var selectedcat = ['Business/administrative matters under 5% effort', 'Pre-CAN (ESD, LD, CS) support'];
+var selectedsubcat = ['Test1', 'Preliminary FTO or patentability, including patent landscape analysis'];
+
+var retrivealldata = [
+    // ... (as provided in the question)
+];
+
+function findMatchingItems() {
+    var matchingItems = [];
+
+    retrivealldata.forEach(function (item) {
+        if (
+            selectedcat.includes(item.Categories.Title) &&
+            selectedsubcat.includes(item.SubCategories.Title) &&
+            item.Effort !== 0
+        ) {
+            matchingItems.push({
+                ID: item.ID,
+                Category: {
+                    Title: item.Categories.Title,
+                    Id: item.Categories.Id
+                },
+                SubCategory: {
+                    Title: item.SubCategories.Title,
+                    Id: item.SubCategories.Id
+                }
+            });
+        }
+    });
+
+    return matchingItems;
+}
+
+var result = findMatchingItems();
+console.log(result);
+
+==============
 0
 : 
 {ID: 108993, CategoriesTitle: 'Committee Support and Training', SubCategoriesTitle: 'Legal or legislative development analysis or training'}
