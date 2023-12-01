@@ -1,4 +1,44 @@
- console.log("1073",selectedcat,selectedsubcat)
+// Assuming result is your array of items
+for (var i = 0; i < result.length; i++) {
+    var currentItem = result[i];
+
+    var updatedItem = {
+        "__metadata": { "type": itemType },
+        "Status": param,
+        "CategoriesId": currentItem.CategoriesId, // Update this property based on your data structure
+        "SubCategoriesId": currentItem.SubCategoriesId, // Update this property based on your data structure
+        "Effort": currentItem.Effort, // Update this property based on your data structure
+        "UserId": _spPageContextInfo.userId,
+        "SubNCategoryId": currentItem.SubNCategoryId, // Update this property based on your data structure
+        "ManagerId": ManagerId,
+        "Week": currentDate
+    };
+
+    $.ajax({
+        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById(" + currentItem.ID + ")",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(updatedItem),
+        headers: {
+            "accept": "application/json;odata=verbose",
+            "content-type": "application/json;odata=verbose",
+            "X-RequestDigest": $("#__REQUESTDIGEST").val(),
+            "X-HTTP-Method": "MERGE",
+            "IF-MATCH": "*"
+        },
+        success: function (data) {
+            console.log(data);
+        },
+        error: function (data) {
+            console.log(data);
+            CreateErrorLog(listName, data);
+        }
+    });
+}
+
+=================
+
+console.log("1073",selectedcat,selectedsubcat)
         console.log("1075",retrivealldata)
         var result = findMatchingItems();
       
