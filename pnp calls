@@ -1,3 +1,45 @@
+ console.log("1073",selectedcat,selectedsubcat)
+        console.log("1075",retrivealldata)
+        var result = findMatchingItems();
+      
+console.log("1096",result);
+     var item = {
+        "__metadata": { "type": itemType },
+        
+        "Status":param,
+        "CategoriesId":$('#drpCat'+valuesId[i]).val(),
+        "SubCategoriesId":($('#drpSubCat'+valuesId[i]).val() != "--select--")?$('#drpSubCat'+valuesId[i]).val():null,
+        "Effort":($('#hours'+valuesId[i]).val()== "")?0:parseInt($('#hours'+valuesId[i]).val(),10),
+        "UserId":_spPageContextInfo.userId,
+        "SubNCategoryId":($('#drpSubNCat'+valuesId[i]).val() != "--select--")?$('#drpSubNCat'+valuesId[i]).val():null,
+        "ManagerId":ManagerId,
+        "Week":currentDate 
+                
+    };
+
+    $.ajax({
+        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById("+ItemId+")",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(item),
+        headers: {
+            "accept":"application/json;odata=verbose",
+			"content-type": "application/json;odata=verbose",
+			"X-RequestDigest":$("#__REQUESTDIGEST").val(),
+			"X-HTTP-Method": "MERGE",
+			"IF-MATCH":"*"      
+			  },
+        success: function (data) {
+            console.log(data);
+        },
+        error: function (data) {
+            console.log(data);
+            CreateErrorLog(listName,data); 
+
+        }
+    });
+   
+=====================
 
 var selectedcat = ['Business/administrative matters under 5% effort', 'Pre-CAN (ESD, LD, CS) support'];
 var selectedsubcat = ['Test1', 'Preliminary FTO or patentability, including patent landscape analysis'];
