@@ -1,3 +1,35 @@
+
+var selectedcat = ['Business/administrative matters under 5% effort', 'Pre-CAN (ESD, LD, CS) support'];
+var selectedsubcat = ['Test1', 'Preliminary FTO or patentability, including patent landscape analysis'];
+
+var retrivealldata = [
+    // ... (as provided in the question)
+];
+
+function findMatchingItems() {
+    var matchingItems = [];
+
+    retrivealldata.forEach(function (item) {
+        if (
+            selectedcat.includes(item.Categories.Title) &&
+            selectedsubcat.includes(item.SubCategories.Title)
+        ) {
+            matchingItems.push({
+                ID: item.ID,
+                CategoryTitle: item.Categories.Title,
+                SubCategoryTitle: item.SubCategories.Title
+            });
+        }
+    });
+
+    return matchingItems;
+}
+
+var result = findMatchingItems();
+console.log(result);
+
+===============
+
 function findMatchingData(selectedcat, selectedsubcat, retrivealldata) {
     const matchingData = [];
 
