@@ -1,3 +1,5 @@
+var subCategoryTitle = item.SubCategories.Title || "N/A"; // Default to "N/A" if null
+==========
 
 var selectedcat = ['Business/administrative matters under 5% effort', 'Pre-CAN (ESD, LD, CS) support'];
 var selectedsubcat = ['Test1', 'Preliminary FTO or patentability, including patent landscape analysis'];
