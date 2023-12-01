@@ -1,3 +1,16 @@
+
+0
+: 
+{ID: 108993, CategoriesTitle: 'Committee Support and Training', SubCategoriesTitle: 'Legal or legislative development analysis or training'}
+1
+: 
+{ID: 108999, CategoriesTitle: 'Oppositions', SubCategoriesTitle: 'IPR, PGR, IPE support (*or move IPE Support to Client counseling)'}
+2
+: 
+{ID: 108991, CategoriesTitle: 'Pre-CAN (ESD, LD, CS) support', SubCategoriesTitle: 'Publication reviews and planning'}
+length
+: 
+3
 var subCategoryTitle = item.SubCategories.Title || "N/A"; // Default to "N/A" if null
 ==========
 
