@@ -1,3 +1,27 @@
+function findMatchingData(selectedcat, selectedsubcat, retrivealldata) {
+    const matchingData = [];
+
+    for (const data of retrivealldata) {
+        if (
+            selectedcat.includes(data.Categories.Title) &&
+            selectedsubcat.includes(data.SubCategories.Title)
+        ) {
+            matchingData.push({
+                ID: data.ID,
+                CategoriesTitle: data.Categories.Title,
+                SubCategoriesTitle: data.SubCategories.Title
+            });
+        }
+    }
+
+    return matchingData;
+}
+
+// Example usage
+const result = findMatchingData(selectedcat, selectedsubcat, retrivealldata);
+console.log(result);
+
+================
 
 var  selectedcat=['Business/administrative matters under 5% effort', 'Pre-CAN (ESD, LD, CS) support'] 
 
