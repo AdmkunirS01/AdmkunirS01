@@ -1,3 +1,17 @@
+
+var  selectedcat=['Business/administrative matters under 5% effort', 'Pre-CAN (ESD, LD, CS) support'] 
+
+var  selectedsubcat=['Test1', 'Preliminary FTO or patentability, including patent landscape analysis']
+
+var retrivealldata=[Categories: {odata.type: 'SP.Data.CategoriesListItem', odata.id: '6937154b-019c-413c-9ea8-dcc352295597', Title: 'Business/administrative matters under 5% effort', Id: 6}
+Effort: 15
+ID:108428
+Id:108428
+Status:"Saved not Submitted"
+SubCategories:{odata.type: 'SP.Data.SubcategoriesListItem', odata.id: 'a31907b3-2431-48f7-bd60-2b0d3be8895e', Title: 'Test1', Id: 25}
+
+=========================
+
 function AddRowFixedCategory() {
     var id = $('.tableRow').last().attr('id');
     id = (id) ? id.replace(/tableRow/, '') : "0";
