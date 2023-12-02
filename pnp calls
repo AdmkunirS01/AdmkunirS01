@@ -1,4 +1,40 @@
-// Assuming result is your array of items
+
+var selectedcat = ['Business/administrative matters under 5% effort', 'Pre-CAN (ESD, LD, CS) support'];
+var selectedsubcat = ['Test1', 'Preliminary FTO or patentability, including patent landscape analysis'];
+
+var retrivealldata = [
+    // ... (as provided in the question)
+];
+
+function findMatchingItems() {
+    var matchingItems = [];
+
+    retrivealldata.forEach(function (item) {
+        if (item.Effort !== 0) {
+            // Check the condition related to Effort not equal to zero
+            if (
+                selectedcat.includes(item.Categories.Title) &&
+                selectedsubcat.includes(item.SubCategories.Title)
+            ) {
+                matchingItems.push({
+                    ID: item.ID,
+                    Category: {
+                        Title: item.Categories.Title,
+                        Id: item.Categories.Id
+                    },
+                    SubCategory: {
+                        Title: item.SubCategories.Title,
+                        Id: item.SubCategories.Id
+                    }
+                });
+            }
+        }
+    });
+
+    return matchingItems;
+}
+
+=========// Assuming result is your array of items
 for (var i = 0; i < result.length; i++) {
     var currentItem = result[i];
 
