@@ -1,3 +1,28 @@
+// Iterate through the getallids array
+for (var i = 0; i < getallids.length; i++) {
+    var itemIdToCheck = getallids[i];
+
+    // Flag to check if the item is found
+    var isIdPresent = false;
+
+    // Iterate through the retrivealldata array
+    for (var j = 0; j < retrivealldata.length; j++) {
+        // Check if the retrivealldata array contains an item with the specified ID
+        if (retrivealldata[j].ID === itemIdToCheck) {
+            isIdPresent = true;
+            break; // No need to check further, exit the loop
+        }
+    }
+
+    if (isIdPresent) {
+        console.log('Item with ID ' + itemIdToCheck + ' is present in retrivealldata array.');
+    } else {
+        console.log('Item with ID ' + itemIdToCheck + ' is not present in retrivealldata array.');
+    }
+}
+
+=========
+
 for (var i = 0; i < getallids.length; i++) {
     var itemId = getallids[i];
 
