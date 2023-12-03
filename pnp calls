@@ -1,3 +1,29 @@
+
+// Your existing arrays and data...
+var getallids = [0, 110066, 110078, /* ... */ ];
+var retrivealldata = [ /* ... */ ];
+
+// Your loop...
+for (var i = 0; i < valuesId.length; i++) {
+    // ... (your existing code)
+
+    // Check if the current ItemId is in the retrivealldata array
+    var matchFound = retrivealldata.some(function (item) {
+        return item.ID === ItemId;
+    });
+
+    if (!matchFound) {
+        // If no match is found, execute the existing logic
+        if (ItemId == 0) {
+            // ... (your existing code for itemId == 0)
+        } else {
+            // ... (your existing code for itemId != 0)
+        }
+    }
+}
+
+=============
+
 for(var i=0;i<valuesId.length;i++){
 console.log($('#Item'+valuesId[i]).val());
 var ItemId=parseInt($('#Item'+valuesId[i]).val(),10);
