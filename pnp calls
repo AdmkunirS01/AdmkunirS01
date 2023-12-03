@@ -1,3 +1,30 @@
+// Your arrays and object
+var getallids = [0, 110066, 110078, 110082, 110092, 110075, 110094, 110083, 110081, 110086, 110088, 110091, 110080, 110087, 110077, 110073, 110067, 110089, 110085, 110079, 110076, 110071, 110074, 110069, 110072, 110070, 110068, 110093, 110084, 110090, 0];
+var retrivealldata = { 0: 1100911, 2: 110087, 3: 110093, 4: 110084, 5: 110071 };
+
+// Check for matching IDs
+var hasMatch = false;
+
+for (var i = 0; i < getallids.length; i++) {
+    var itemId = getallids[i];
+
+    // Check if the ID is in retrivealldata
+    if (retrivealldata.hasOwnProperty(itemId)) {
+        hasMatch = true;
+        break; // Exit the loop as soon as a match is found
+    }
+}
+
+// Execute code based on the result
+if (hasMatch) {
+    // Code to execute when there is a match
+    console.log("Match found. Execute code for matching IDs.");
+} else {
+    // Code to execute when there is no match
+    console.log("No match found. Execute code for non-matching IDs.");
+}
+
+============
 
 // Your existing arrays and data...
 var getallids = [0, 110066, 110078, /* ... */ ];
