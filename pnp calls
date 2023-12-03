@@ -1,4 +1,1910 @@
+var Categories=[];
+var SubCategories=[];
+var SubNCategories=[];
+var valuesId=[];
+var ManagerId=0;
+var deleteId=[];
+var flag1= true;
+var flag2=false;
+var flagCheckvalid=false;
+//For Fixed Category Changes
+var fixedCategory='Business/administrative matters under 5% effort';
+var fixedCategoryId=0;  
+var fixedCategoryDefaultValue='';
+var allcatIds=[];
+var allselectedIds=[];
+var extracat=[];
+var allCategorId=[];
+var getallids=[];
 
+var _totalEffortLimit = 100;
+
+$(document).ready(function() {
+   
+      
+     
+var date1=new Date();
+console.log(date1);
+document.getElementById("fromdate").value=moment(date1).format("YYYY-MM-DD");
+openForm();
+ closeForm();
+ $(".se-pre-con").css("display", "block");
+console.log("js file");
+
+  GetCategories();
+  GetSubCategories();
+  GetSubNCategories();
+  getFixedCategory();
+  getManagerDetails();
+   hideRecallButton();
+   getEffortDetails(date1);
+   getLastWeeksEffort();
+    setDefaultUserName();
+    setDefaultDate();
+    getManagerDetails();
+    
+    //to get Query string variable- date
+ const params = new Proxy(new URLSearchParams(window.location.search), {
+  get: (searchParams, prop) => searchParams.get(prop),
+});
+
+let value = params.date; 
+     console.log("date value",value);
+     
+     // check query string variable present 
+    console.log("check value of url date",value);
+    if(value != null){
+    console.log("date value from url");
+    $('#fromdate').val(moment(date1).format("YYYY-MM-DD"));
+    $('#fromdate').val(value);changeDate();
+    showChangeDate(moment(date1).format("YYYY-MM-DD"));
+    showChangeDate(value);
+    }
+    else{
+    console.log("current date");
+    $('#fromdate').val(moment(date1).format("YYYY-MM-DD"));
+    showChangeDate(moment(date1).format("YYYY-MM-DD"));
+    
+    }
+    
+    //$('#fromdate').val(moment(date1).format("YYYY-MM-DD"));    $('#fromdate').val("2023-04-13");changeDate();
+    //showChangeDate(moment(date1).format("YYYY-MM-DD"));
+    //To get fixed categpry
+    //  retrieveListItems();
+   setTimeout(function(){
+    $(".se-pre-con").css("display", "none");  
+   },4000);
+   
+    });
+    
+     function hideRecallButton(){
+     $(".buttonRecall").hide();
+
+  }
+  function showRecallButton(){
+  $(".buttonRecall").show();
+
+  }
+
+   var listItems = [];
+ 
+      // SharePoint site URL
+      var siteUrl = "https://pfizer.sharepoint.com/sites/ARMS-Dev";
+ 
+      // SharePoint list title
+      var listTitle = "EffortTrackingList";
+ 
+      // SharePoint REST API URL
+    
+      // Function to retrieve list items using the SharePoint REST API
+      function retrieveListItems() {
+       console.log("97")
+    
+
+        $.ajax({
+          url: "https://pfizer.sharepoint.com/sites/ARMS-Dev/_api/web/lists/getbytitle('" + listTitle + "')/items?$select=Week,User/Id&$filter=UserId eq "+_spPageContextInfo.userId+"&$expand=User&$top=5000",
+          method: "GET",
+          headers: {
+            "Accept": "application/json; odata=verbose"
+          },
+          success: function(data) {
+            var items = data.d.results;
+            if(items.length>0)
+            {
+            console.log("81items",items[0].Week)
+          
+            var today= new Date(items[0].Week);
+             var today1= new Date();
+
+            console.log("items",today)
+}
+
+    const firstDayofWeek= new Date(today.getFullYear(),today.getMonth(),today.getDate()-today.getDay()+1);
+    console.log("first",firstDayofWeek)
+    
+    const lastDayofWeek= new Date(today.getFullYear(),today.getMonth(),today.getDate()+(6-today.getDay()+1)); 
+    console.log("last",lastDayofWeek)
+    if(today>=firstDayofWeek&&today<=lastDayofWeek)
+    {
+    console.log("Today date current week");
+    document.getElementById("notify").style.display = "none";
+
+    } 
+ else
+ {
+ console.log("this date not in current week");
+  document.getElementById("notify").style.display = "block";
+
+ }
+       
+            // Check if there are more items to retrieve
+            if (data.d.__next) {
+           console.log("41",data.d.__next);
+            } else {
+              // Bind listItems array to DataTable
+              console.log("44",listItems)
+              
+            }
+          },
+          error: function(data) {
+            console.log("Error: " + data.statusText);
+          }
+        });
+      }
+ 
+  function getFixedCategory(){
+   $.ajax({  
+        url:  _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('Categories')/items?$select=Title,DefaultValue,Id&$filter=Active eq 1 and SortOrder eq 1&$orderBy=SortOrder"+"",  
+        headers: {  
+            "Access-Control-Allow-Origin":"*",
+            "Accept": "application/json"  
+        },  
+        async: false,  
+        success: function (data) {  
+            console.log(data);
+            if(data.value.length>0){
+             fixedCategoryId=data.value[0].Id;
+              fixedCategoryDefaultValue=data.value[0].DefaultValue;
+
+            console.log(fixedCategoryId);
+            
+            }
+
+                        
+		},  
+        eror: function (data) {  
+            alert("An error occurred. Please try again."); 
+            CreateErrorLog("Categories",data); 
+ 
+        }  
+    });  
+
+  
+  }
+   function ShowTotalHours(){
+   var sum=0;
+    for(var i=0;i<valuesId.length;i++){
+     sum+=($('#hours'+valuesId[i]).val())?parseInt($('#hours'+valuesId[i]).val(),10):0;
+             //element2.classList.add('hideButtons');
+     $("#totalhours").val(sum);
+             }
+	 $("#totalhours").val(sum);
+   }
+   function disableButtons(){
+    var element= document.getElementsByClassName("buttonShow");
+    $(".buttonShow").prop('disabled', true);
+    console.log(element);
+    for(var i=0;i<element.length;i++){
+    var element2=element[i];
+             //element2.classList.add('hideButtons');
+             }
+
+   
+   }
+   function EnableButtons(){
+    var element= document.getElementsByClassName("buttonShow");
+     $(".buttonShow").prop('disabled', false);
+
+    console.log(element);
+    for(var i=0;i<element.length;i++){
+    var element2=element[i];
+             element2.classList.remove('hideButtons');
+             }
+
+   
+   }
+
+  function isNumber(evt) {
+    evt = (evt) ? evt : window.event;
+    var charCode = (evt.which) ? evt.which : evt.keyCode;
+    if(charCode == 46 ){
+    return true;
+    }
+   else  if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+        return false;
+    }
+    
+    return true;
+}
+  function showChangeDate(param){
+  console.log("showchange date");
+  $('#showWeekDate').empty();
+	var today=param;
+  console.log(moment(today).format('d'));
+  var noDays=moment(today).format('d');
+   var prevDay= today;
+   var nextDay=today;
+   noDays=parseInt(noDays,10);
+  if(noDays<=5 && noDays!=0){
+  var n=5-noDays;
+  nextDay= moment(today).add(n+2, "days");
+ nextDay= moment(nextDay).format("MM/DD/YY");
+ prevDay= moment(today).subtract((5-n-1), "days");
+	prevDay = moment(prevDay).format("MM/DD/YY");
+
+
+  }
+  else{
+   if(noDays==0){
+   prevDay= moment(today).subtract(6, "days");
+	prevDay = moment(prevDay).format("MM/DD/YY");
+	nextDay= moment(today).subtract(0, "days");
+ 	nextDay= moment(nextDay).format("MM/DD/YY");
+
+   }
+   else{
+	prevDay= moment(today).subtract(5, "days");
+	prevDay = moment(prevDay).format("MM/DD/YY");
+	nextDay= moment(today).subtract(-1, "days");
+ 	nextDay= moment(nextDay).format("MM/DD/YY");
+ 	}
+
+  
+  }
+  $('#showWeekDate').append(""+prevDay+" -  "+nextDay+"");
+ //add(1,'days');
+ //var prevDay= moment(today).subtract(4, "days");
+ //prevDay = moment(prevDay).format("MM/DD/YYYY");
+//today = moment(today).format("MM/DD/YYYY");
+
+  }
+    function changeDate(){
+ //document.getElementById("todate").value;
+ valuesId=[];
+ document.getElementById("fromdate").value=$('#fromdate').val();
+ showChangeDate($('#fromdate').val());
+ getEffortDetails($('#fromdate').val());
+}
+
+  
+    function openForm(){
+document.getElementById("myForm").style.display = "block";
+}
+function closeForm(){
+document.getElementById("myForm").style.display = "none";
+}
+
+    function setDefaultUserName() {
+    var txtName = document.getElementById('txtName');
+
+    title = $().SPServices.SPGetCurrentUser({
+        fieldName: "Title"
+    });
+
+
+    if (txtName != null && txtName != undefined && txtName != '') {
+        txtName.value = title;
+    }
+    //userId = $().SPServices.SPGetCurrentUser({
+    //    fieldName: "ID"
+   // });
+
+}
+function getManagerDetails(){
+$.ajax({  
+        url:  _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('ManagerAssigneeMapping')/items?$select=Manager/Title,Manager/Id,Id&$filter=AssigneeId eq "+_spPageContextInfo.userId+"&$expand=Manager"+"",  
+        headers: {  
+            "Access-Control-Allow-Origin":"*",
+            "Accept": "application/json"  
+        },  
+        async: false,  
+        success: function (data) {  
+            console.log(data);
+            if(data.value.length >0){
+             var manager=data.value;
+             ManagerId=manager[0].Manager.Id;
+            console.log(ManagerId);
+            }
+            $("#ShowNote").remove();
+
+			if(ManagerId == 0){
+			
+			$("#warningHeader").append("<span id='ShowNote'>Note: Manager for the logged in user is not assigned</span>");
+
+			
+			}
+			else{
+			//$("#warningHeader").append("<span>Note: Manager for the logges in user is not assigned</span>");
+			
+			$("#ShowNote").remove();
+			}
+                       
+		},  
+        error: function (data) {  
+            alert("An error occurred. Please try again."); 
+              $(".se-pre-con").css("display", "none");
+              CreateErrorLog("ManagerAssigneeMapping",data); 
+        }  
+    });  
+
+
+}
+function AddRowFixedCategory(){
+var id = $('.tableRow').last().attr('id');
+   id =(id)? id.replace(/tableRow/, ''):"0";
+    console.log(id);
+    id=parseInt(id,10)+1;
+    valuesId.push(id);
+    console.log(valuesId);
+
+ var markup = 
+            '<tr class="row tableRow" id="tableRow'+id+'" style="text-align: center;">'+
+           '<td ><input name="timesheet" id="timesheet'+id+'" type="checkbox" /></td>'+
+            '<td id="catgs'+id+'"><select class="drpdwnClass" data-toggle="tooltip" title=' +fixedCategory.split(" ") +' id="drpCat'+id+'" onchange="AppendSubcategoriesDropdown(drpCat'+id+')" value='+fixedCategoryId+' style="width: 95%;">'+
+              '<option>--select--</option></select></td><td>'+
+            '<select class="drpdwnClass" id="drpSubCat'+id+'" onchange="AppendSubNcategoriesDropdown(drpSubCat'+id+')"  style="width: 95%;">'+
+             '<option>--select--</option></select><span class="starcat'+id+'" style="color: red; font-size: 12">*</span> </td>'+
+                  '<td style="display:none">'+
+            '<select class="drpdwnClass" id="drpSubNCat'+id+'" style="width: 95%;">'+
+            ' <option>--select--</option></select> </td> <td>'+
+            '<input id="hours'+id+'" type="text" style="width: 130px;" onkeypress="return isNumber(event)" onchange="ShowTotalHours()" value="'+fixedCategoryDefaultValue+'"/> </td>'
+            +'<td style="display:none;"><input type="text" id="Item'+id+'" value="0"></span></td>'+
+            '</tr>';
+             
+            $("#effortBody").append(markup);
+           $(".starcat"+id).css('display', 'none');
+          
+            AppendCatgeoriesDropdownWithFixedCategoryValues("drpCat"+id,fixedCategoryId);
+            
+              
+        }
+
+function AddRow(){
+var id = $('.tableRow').last().attr('id');
+   id =(id)? id.replace(/tableRow/, ''):"0";
+    console.log(id);
+        id=parseInt(id,10)+1;
+    
+    valuesId.push(id);
+    console.log(valuesId);
+    
+    console.log("addrowtest5");
+
+ var markup = 
+            '<tr class="row tableRow" id="tableRow'+id+'" style="text-align: center;">'+
+           '<td ><input name="timesheet" id="timesheet'+id+'" type="checkbox" /></td>'+
+            '<td id="catgs'+id+'"><select class="drpdwnClass" data-toggle="tooltip" title="test7" id="drpCat'+id+'" onchange="AppendSubcategoriesDropdown(drpCat'+id+')" style="width: 95%;">'+
+              '<option>--select--</option></select></td><td>'+
+            '<select class="drpdwnClass" id="drpSubCat'+id+'" onchange="AppendSubNcategoriesDropdown(drpSubCat'+id+')"  style="width: 95%;">'+
+             '<option>--select--</option></select><span class="starcat'+id+'" style="color: red; font-size: 12">*</span> </td>'+
+                  '<td style="display:none">'+
+            '<select class="drpdwnClass" id="drpSubNCat'+id+'" style="width: 95%;">'+
+            ' <option>--select--</option></select> </td> <td>'+
+            '<input id="hours'+id+'" type="text" style="width: 130px;" onkeypress="return isNumber(event)" onchange="ShowTotalHours()"/> </td>'
+            +'<td style="display:none;"><input type="text" id="Item'+id+'" value="0"></span></td>'+
+            '</tr>';
+
+            $("#effortBody").append(markup);
+            $(".starcat"+id).css('display', 'none');
+            AppendCatgeoriesDropdown("drpCat"+id);
+            
+              
+        }
+function AddRowWithValues(Values){
+ 
+ for(var i=0;i<Values.length;i++){
+ var id = $('.tableRow').last().attr('id');
+   id =(id)? id.replace(/tableRow/, ''):"0";
+    console.log(id);
+    id=parseInt(id,10)+1;
+    valuesId.push(id);
+    console.log(valuesId);
+
+ var markup = 
+            '<tr class="row tableRow" id="tableRow'+id+'" style="text-align: center;">'+
+           '<td ><input id="timesheet'+id+'" type="checkbox" name="timesheet" /></td>'+
+            '<td id="catgs'+id+'"><select class="drpdwnClass" data-toggle="tooltip"  title='+Values[i].Categories.Title.split(" ")+' id="drpCat'+id+'" onchange="AppendSubcategoriesDropdown(drpCat'+id+')" value='+Values[i].Categories.Id+' style="width: 95%;">'+
+              '<option>--select--</option></select></td><td>'+
+            '<select class="drpdwnClass" id="drpSubCat'+id+'" onchange="AppendSubNcategoriesDropdown(drpSubCat'+id+')"  style="width: 95%;">'+
+             '<option>--select--</option></select><span class="starcat'+id+'" style="color: red; font-size: 12">*</span> </td>'+
+                  '<td style="display:none">'+
+            '<select class="drpdwnClass" id="drpSubNCat'+id+'" style="width: 95%;" >'+
+            ' <option>--select--</option></select> </td> <td>'+
+            '<input id="hours'+id+'" type="text" value='+Values[i].Effort+' style="width: 130px;" onkeypress="return isNumber(event)" onchange="ShowTotalHours()"/> </td>'
+            +'<td style="display:none;"><input type="text" id="Item'+id+'" value="'+Values[i].Id+'"></span></td>'+
+
+            '</tr>';
+
+            $("#effortBody").append(markup);
+            $(".starcat"+id).css('display', 'none');
+            AppendCatgeoriesDropdownWithValues("drpCat"+id,Values[i]);
+            AppendSubcategoriesDropdownWithValues("drpSubCat"+id,Values[i]);
+            AppendSubNcategoriesDropdownWithValues("drpSubNCat"+id,Values[i]);
+            ShowTotalHours();
+
+}
+            
+ }
+
+function AddRowWithValuesId(Values){
+ 
+ for(var i=0;i<Values.length;i++){
+ var id = $('.tableRow').last().attr('id');
+   id =(id)? id.replace(/tableRow/, ''):"0";
+    console.log(id);
+    id=parseInt(id,10)+1;
+    valuesId.push(id);
+    console.log(valuesId);
+
+ var markup = 
+            '<tr class="row tableRow" id="tableRow'+id+'" style="text-align: center;">'+
+           '<td><input id="timesheet'+id+'" type="checkbox" name="timesheet" /></td>'+
+            '<td id="catgs'+id+'"><select class="drpdwnClass" data-toggle="tooltip" title='+Values[i].Categories.Title.split(" ")+' id="drpCat'+id+'" onchange="AppendSubcategoriesDropdown(drpCat'+id+')" value='+Values[i].Categories.Id+' style="width: 95%;">'+
+              '<option>--select--</option></select></td><td>'+
+            '<select class="drpdwnClass" id="drpSubCat'+id+'" onchange="AppendSubNcategoriesDropdown(drpSubCat'+id+')"  style="width: 95%;">'+
+             '<option>--select--</option></select><span class="starcat'+id+'" style="color: red; font-size: 12">*</span> </td>'+
+                  '<td style="display:none">'+
+            '<select class="drpdwnClass" id="drpSubNCat'+id+'" style="width: 95%;">'+
+            ' <option>--select--</option></select> </td> <td>'+
+            '<input id="hours'+id+'" type="text" value='+Values[i].Effort+' style="width: 130px;" onkeypress="return isNumber(event)" onchange="ShowTotalHours()"/> </td>'
+            +'<td style="display:none;"><input type="text" id="Item'+id+'" value="0"></span></td>'+
+            '</tr>';
+
+            $("#effortBody").append(markup);
+            $(".starcat"+id).css('display', 'none');
+            AppendCatgeoriesDropdownWithValues("drpCat"+id,Values[i]);
+            AppendSubcategoriesDropdownWithValues("drpSubCat"+id,Values[i]);
+            AppendSubNcategoriesDropdownWithValues("drpSubNCat"+id,Values[i]);
+            closeForm();
+            ShowTotalHours();
+
+}
+            
+ }
+
+function AppendCatgeoriesDropdown(drpCatid){
+var cat="";
+for(var i=0;i<Categories.length;i++){
+	cat+='<option value='+Categories[i].Id+' >'+Categories[i].Title+'</option>';
+}
+ $('#'+drpCatid).append(cat);
+
+}
+//Added by Abhijeet Singh -- for fixed category value
+//start
+function AppendCatgeoriesDropdownWithFixedCategoryValues(drpCatid,assignedValue){
+var cat="";
+for(var i=0;i<Categories.length;i++){
+	cat+='<option value='+Categories[i].Id+' >'+Categories[i].Title+'</option>';
+}
+ $('#'+drpCatid).append(cat);
+  //$('#'+drpCatid).val(assignedValue);
+   let element = document.getElementById(drpCatid);
+    element.value = assignedValue;
+    AppendSubcategoriesDropdownWithFixedCategoryValues(drpCatid,assignedValue);
+
+}
+function AppendSubcategoriesDropdownWithFixedCategoryValues(drpCatId,assignedValue){
+var categor=drpCatId;
+console.log(categor);
+
+var id = categor;
+   id = id.replace(/drpCat/, '',$('#'+categor +' :selected').text(),'abcd');
+    console.log(id);
+    id=parseInt(id,10);
+ let getObj=Categories.filter((res)=>res.Title==$('#'+categor +' :selected').text());
+  console.log(getObj[0].MandatorySubcategory,'hello',Categories);
+  if((getObj[0].MandatorySubcategory==true)){
+
+$(".starcat"+id).css('display', 'inline');
+
+
+}
+else if((getObj[0].MandatorySubcategory==null && getObj[0].MandatorySubcategory==false)){
+flag1=false;
+$(".starcat"+id).css('display', 'none');
+}
+
+
+$('#drpSubCat'+id).empty();
+var cat="<option>--select--</option>";
+for(var i=0;i<SubCategories.length;i++){
+var valuedrp=assignedValue;
+	if(valuedrp ==SubCategories[i].Category.Id){
+	cat+='<option value='+SubCategories[i].Id+'>'+SubCategories[i].Title+'</option>';
+	}
+}
+ $('#drpSubCat'+id).append(cat);
+ //fixed category Id 
+ 
+
+}
+
+//end
+
+function AppendCatgeoriesDropdownWithValues(drpCatid,assignedValue){
+var cat="";
+for(var i=0;i<Categories.length;i++){
+	cat+='<option value='+Categories[i].Id+'>'+Categories[i].Title+'</option>';
+}
+ $('#'+drpCatid).append(cat);
+  //$('#'+drpCatid).val(assignedValue);
+   let element = document.getElementById(drpCatid);
+    element.value = assignedValue.Categories.Id;
+
+}
+
+function AppendSubcategoriesDropdown(drpCatId){
+var categor=drpCatId.id;
+console.log("drpCatId",drpCatId);
+console.log("Categories on change:==>",Categories,"categor:",categor);
+//let getCat=Categories.filter((res)=>res.ID==categor)
+
+var id = categor;
+   id = id.replace(/drpCat/, '');
+    console.log(id);
+    let getObj=Categories.filter((res)=>res.Title==$('#'+categor +' :selected').text());
+  console.log(getObj[0].MandatorySubcategory,'hello');
+  if((getObj[0].MandatorySubcategory==true)){
+flag1=true;
+$(".starcat"+id).css('display', 'inline');
+
+
+}
+else if((getObj[0].MandatorySubcategory==null || getObj[0].MandatorySubcategory==false)){
+flag1=false;
+$(".starcat"+id).css('display', 'none');
+}
+
+    id=parseInt(id,10);
+
+// getting selected category text and setting it to tooltip
+console.log($('#'+categor +' :selected').text());    
+    $('#'+categor).attr('title',$('#'+categor +' :selected').text());
+
+$('#drpSubCat'+id).empty();
+var cat="<option>--select--</option>";
+for(var i=0;i<SubCategories.length;i++){
+var valuedrp=$('#'+categor).val();
+
+	if(valuedrp ==SubCategories[i].Category.Id){
+	cat+='<option value='+SubCategories[i].Id+'>'+SubCategories[i].Title+'</option>';
+	//if((SubCategories[i].MandetorySubcategory==true)){
+
+//$(".starcat"+id).show();
+
+
+//}
+//else if((SubCategories[i].MandetorySubcategory==null)){
+
+//$(".starcat"+id).hide();
+//}
+
+	
+	
+	}
+}
+ $('#drpSubCat'+id).append(cat);
+
+}
+function AppendSubcategoriesDropdownWithValues(drpCatId,assignedValue){
+var categor=drpCatId;
+console.log(categor);
+var id = categor;
+   id = id.replace(/drpSubCat/, '');
+    console.log(id);
+    id=parseInt(id,10);
+  
+
+$('#drpSubCat'+id).empty();
+var cat="<option>--select--</option>";
+for(var i=0;i<SubCategories.length;i++){
+var valuedrp=assignedValue.Categories.Id;
+	if(valuedrp ==SubCategories[i].Category.Id){
+	cat+='<option value='+SubCategories[i].Id+'>'+SubCategories[i].Title+'</option>';
+	}
+}
+ $('#drpSubCat'+id).append(cat);
+ //fixed category Id
+ if(assignedValue.SubCategories!= null){
+
+ let element = document.getElementById(drpCatId);
+    element.value = assignedValue.SubCategories.Id;
+    }
+
+
+}
+
+function AppendSubNcategoriesDropdown(drpSubCatId){
+var Subcategor=drpSubCatId.id;
+console.log("hello js",SubCategories,Subcategor);
+var id = Subcategor;
+   id = id.replace(/drpSubCat/, '');
+    console.log(id);
+    id=parseInt(id,10);
+    
+ console.log($('#'+Subcategor +' :selected').text());    
+    $('#'+Subcategor).attr('title',$('#'+Subcategor +' :selected').text());
+   
+
+$('#drpSubNCat'+id).empty();
+var cat="<option>--select--</option>";
+for(var i=0;i<SubNCategories.length;i++){
+var valuedrp=$('#'+Subcategor).val();
+	if(valuedrp ==SubNCategories[i].SubCategory.Id){
+	cat+='<option value='+SubNCategories[i].Id+'>'+SubNCategories[i].Title+'</option>';
+	}
+}
+ $('#drpSubNCat'+id).append(cat);
+
+}
+function AppendSubNcategoriesDropdownWithValues(drpSubCatId,assignedValue){
+var Subcategor=drpSubCatId;
+console.log(Subcategor);
+var id = Subcategor;
+   id = id.replace(/drpSubNCat/, '');
+    console.log(id);
+    id=parseInt(id,10);
+
+$('#drpSubNCat'+id).empty();
+var cat="<option>--select--</option>";
+for(var i=0;i<SubNCategories.length;i++){
+//fixed category Id
+if(assignedValue.SubCategories!= null){
+
+var valuedrp=assignedValue.SubCategories.Id;
+	if(valuedrp ==SubNCategories[i].SubCategory.Id){
+	cat+='<option value='+SubNCategories[i].Id+'>'+SubNCategories[i].Title+'</option>';
+	}
+	}
+}
+ $('#drpSubNCat'+id).append(cat);
+ if(assignedValue.SubNCategoryId != null){
+ let element = document.getElementById(drpSubCatId);
+    element.value = assignedValue.SubNCategory.Id;
+    }
+
+}
+function validateHours(){
+
+var valid = true;
+ var sum =0;
+        for(var i = 0 ; i< valuesId.length; i++){
+        sum+=parseInt($('#hours'+valuesId[i]).val(),10);
+
+}
+if(sum>_totalEffortLimit){
+valid=false;
+}
+return valid;
+
+}
+function validateValues(){
+var valid = true;
+        for(var i = 0 ; i< valuesId.length; i++){
+             if($('#drpCat'+valuesId[i]).val() == '--select--'){
+             var element= document.getElementById('drpCat'+valuesId[i]);
+             element.classList.add('hasError');
+                valid = false;
+                            }
+            else {
+            var element= document.getElementById('drpCat'+valuesId[i]);
+                element.classList.remove("hasError");
+                }
+        	/*if($('#drpSubCat'+valuesId[i]).val() == '--select--'){
+             var element= document.getElementById('drpSubCat'+valuesId[i]);
+             element.classList.add('hasError');
+                valid = false;
+                            }
+            else{
+            var element= document.getElementById('drpSubCat'+valuesId[i]);
+                element.classList.remove("hasError");
+                }
+                */
+                 /*if($('#drpSubCat'+valuesId[i]).val() == '--select--' && $('#starcat'+valuesId[i]).is(":visible")){
+                 flagCheckvalid=true;
+                 }
+                 else{
+                 flagCheckvalid=false;
+                 }*/
+
+              //  if(flag1==true || flagCheckvalid==true){
+               console.log('value'+ $('#drpSubCat'+valuesId[i]).val() );
+                              console.log('visible'+$('.starcat'+valuesId[i]).is(":visible"));
+             if(($('#drpSubCat'+valuesId[i]).val() == '--select--') &&( $('.starcat'+valuesId[i]).is(":visible"))){
+             var element= document.getElementById('drpSubCat'+valuesId[i]);
+             element.classList.add('hasError');
+             console.log('if loop');
+                valid = false;
+                flag2=true;
+                            }
+            else {
+            var element= document.getElementById('drpSubCat'+valuesId[i]);
+                element.classList.remove("hasError");
+                console.log('else loop');
+                }
+               // }
+               
+              
+            if($('#hours'+valuesId[i]).val() == ''){
+             var element= document.getElementById('hours'+valuesId[i]);
+             element.classList.add('hasError');
+                valid = false;
+                            }
+            else{
+            var element= document.getElementById('hours'+valuesId[i]);
+                element.classList.remove("hasError");
+                }
+
+
+               
+
+        }
+    return valid;
+}
+
+function selectCheckboxes(){
+
+var flag=document.getElementById('selectall').checked;
+if(document.getElementById('selectall').checked){
+$("#effortBody").find('input[name="timesheet"]').each(function(){
+$(this).prop('checked',true);
+
+});
+
+}
+else{
+$("#effortBody").find('input[name="timesheet"]').each(function(){
+$(this).prop('checked',false);
+});
+
+}
+}
+
+function deleteRow(){
+if(confirm("Do you want to delete selected row(s)?")){
+$("#effortBody").find('input[name="timesheet"]').each(function(){
+                if($(this).is(":checked")){
+                	console.log(this.id);
+                	var id=this.id;
+                	id =(id)? id.replace(/timesheet/, ''):"0";
+                	console.log(id);
+                	var index = valuesId.indexOf(parseInt(id,10));
+                	console.log(valuesId);
+					if (index > -1) {
+					  valuesId.splice(index, 1); // 2nd parameter means remove one item only
+					}
+					console.log(valuesId);
+					if(parseInt($('#Item'+id).val(),10)>0){
+					deleteValuesFromList(parseInt($('#Item'+id).val(),10));
+					}
+                	console.log($('#Item'+id).val());
+                	
+
+                    $(this).parents("tr").remove();
+                }
+            });
+            }
+            // new row adding if no rows ae there
+var tbody = $("#effortBody");
+     if(tbody.children().length == 0){
+     AddRow();
+    // alert("empty");
+     }
+     //end
+     $("#selectall").prop('checked',false);
+
+            ShowTotalHours()
+}   
+
+function deleteValuesFromList(param){
+var listName="EffortTrackingList";
+ var itemType = GetItemTypeForListName("EffortTrackingList");
+
+$.ajax({
+         url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById("+param+")",
+         type: "DELETE",
+        
+      	 headers: {
+    	"accept":"application/json;odata=verbose",
+		"content-type": "application/json;odata=verbose",
+		"X-RequestDigest":$("#__REQUESTDIGEST").val(),
+		"IF-MATCH":"*"      
+			  },
+        success: function (data) {
+            console.log(data);
+        },
+        error: function (data) {
+            console.log(data);
+            CreateErrorLog(listName,data); 
+
+        }
+    });
+
+
+}                
+
+function setDefaultDate() {
+    var date = new Date();
+    var txtDate = document.getElementById('fromdate');
+    var curr_date = date.getDate();
+    var curr_month = date.getMonth() + 1;
+    var curr_year = date.getFullYear();
+    if (txtDate != undefined && txtDate != null) {
+        txtDate.value = curr_month + "/" + curr_date + "/" + curr_year;
+    }
+}
+function GetCategories(){
+		 
+    $.ajax({  
+        url:  _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('Categories')/items?$select=Title,MandatorySubcategory,Id&$filter=Active eq 1&$orderBy=SortOrder"+"",  
+        headers: {  
+            "Access-Control-Allow-Origin":"*",
+            "Accept": "application/json"  
+        },  
+        async: false,  
+        success: function (data) {  
+            console.log(data);
+             Categories=data.value;
+            console.log("Categories:",Categories);
+            Categories=data.value;
+            
+            console.log("Categories:id", Categories);
+
+             allCategorId= Categories.map(function (list){
+            return list.Id;
+             });
+                        
+		},  
+        eror: function (data) {  
+            alert("An error occurred. Please try again."); 
+            CreateErrorLog("Categories",data); 
+ 
+        }  
+    });  
+	
+}
+
+function GetSubCategories(){
+		 
+    $.ajax({  
+        url:  _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('Subcategories')/items?$select=Title,Id,MandetorySubcategory,Category/Title,Category/Id&$filter=Active eq 1&$orderBy=SortOrder&$expand=Category"+"",  
+        headers: {  
+            "Access-Control-Allow-Origin":"*",
+            "Accept": "application/json"  
+        },  
+        async: false,  
+        success: function (data) {  
+            console.log(data);
+           SubCategories=data.value;
+            console.log(SubCategories,"==>");
+            SubCategories=data.value;
+            console.log("SubCategories", SubCategories);
+             allcatId= SubCategories.map(function (list){
+            return list.Id;
+            });
+            console.log("SubCategories", allcatId);
+
+                        
+		},  
+        eror: function (data) {  
+            alert("An error occurred. Please try again.");  
+            CreateErrorLog('Subcategories',data);
+        }  
+    });  
+	
+}
+function GetSubNCategories(){
+		 
+    $.ajax({  
+        url:  _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('SubNCategory')/items?$select=Title,Id,SubCategory/Title,SubCategory/Id&$filter=Active eq 1&$orderBy=SortOrder&$expand=SubCategory"+"",  
+        headers: {  
+            "Access-Control-Allow-Origin":"*",
+            "Accept": "application/json"  
+        },  
+        async: false,  
+        success: function (data) {  
+            console.log(data);
+             SubNCategories=data.value;
+            console.log(SubNCategories);
+
+                        
+		},  
+        eror: function (data) {  
+            alert("An error occurred. Please try again."); 
+            CreateErrorLog('SubNCategory',data); 
+        }  
+    });  
+	
+}
+
+function checkFormattedHours(param){
+var check=true;
+for(var i=0;i<param.length;i++){
+if(parseInt($('#hours'+param[i]).val(),10)%5 != 0){
+var element= document.getElementById('hours'+param[i]);
+             element.classList.add('hasError');
+
+check =false;
+}
+else{
+var element= document.getElementById('hours'+param[i]);
+             element.classList.remove('hasError');
+
+}
+}
+
+return check;
+}
+ function SubmitEffortDetails(param) {
+     $(".se-pre-con").css("display", "block");  
+   
+ if(validateValues() ==false || validateHours()== false){
+ if(validateValues() ==false){
+ if(flag2==false){
+ 	alert("Category and Total % are mandatory.");
+ 	$(".se-pre-con").css("display", "none");
+ 	}
+ 	else{
+ 	alert("Category and Total % and Sub-Category are mandatory.");
+ 	$(".se-pre-con").css("display", "none"); 
+ 	} 
+ }
+ 
+
+ else if(validateHours()== false){
+ alert("Total (%) should not exceed " + _totalEffortLimit+".");
+ $(".se-pre-con").css("display", "none"); 
+
+ }
+ return;
+ }
+ 
+ else{
+ if(checkFormattedHours(valuesId) == false){
+ alert("Please submit entries in 5% intervals.");
+ $(".se-pre-con").css("display", "none"); 
+ return;
+ }
+ if(param == "Submitted"){
+ if(confirm("Do you want to submit the entries? ") == false){
+ $(".se-pre-con").css("display", "none"); 
+ return;
+ }
+ }
+
+ var noDays=moment($("#fromdate").val()).format('d');
+
+   var nextDay=$("#fromdate").val();
+   noDays=parseInt(noDays,10);
+  
+  // for sunday.
+  
+  if(noDays==0){
+  
+  nextDay= moment($("#fromdate").val()).add(1, "days");
+ nextDay= moment(nextDay).format("MM/DD/YY"); 
+
+  }
+//
+  else if(noDays<=6){
+  var n=6-noDays;
+  nextDay= moment($("#fromdate").val()).add(n+2, "days");
+ nextDay= moment(nextDay).format("MM/DD/YY");
+ 
+
+  }
+ 
+
+  else{
+  	nextDay= moment($("#fromdate").val()).add(6, "days");
+ 	nextDay= moment(nextDay).format("MM/DD/YY");
+
+  
+  }
+ var today = moment(nextDay).format("YYYY-MM-DD");
+var currentDate = today+'T00:00:00.000Z';
+//changes added on-12-4-2023-nimisha
+var dayprevious = moment(nextDay).add(-1,'days');
+var dayprevious2= moment(dayprevious).format("YYYY-MM-DD");
+dayprevious2=dayprevious2+'T00:00:00.000Z';
+var day2  = moment(nextDay).add(1,'days');
+var day3= moment(day2).format("YYYY-MM-DD");
+var daynext=day3+'T00:00:00.000Z';
+//end
+console.log(currentDate);
+var listName="EffortTrackingList";
+ var itemType = GetItemTypeForListName("EffortTrackingList");
+
+ 
+for(var i=0;i<valuesId.length;i++){
+console.log($('#Item'+valuesId[i]).val());
+var ItemId=parseInt($('#Item'+valuesId[i]).val(),10);
+allselectedIds.push($('#drpSubCat'+valuesId[i]).val());
+getallids.push(ItemId)
+console.log("getallids",getallids);
+console.log(currentDate); 
+if(ItemId == 0){
+    var item = {
+        "__metadata": { "type": itemType },
+        
+        "Status":param,
+        "CategoriesId":$('#drpCat'+valuesId[i]).val(),
+        "SubCategoriesId":($('#drpSubCat'+valuesId[i]).val() != "--select--")?$('#drpSubCat'+valuesId[i]).val():null,
+        "Effort":($('#hours'+valuesId[i]).val()== "")?0:parseInt($('#hours'+valuesId[i]).val(),10),
+        "UserId":_spPageContextInfo.userId,
+        "SubNCategoryId":($('#drpSubNCat'+valuesId[i]).val() != "--select--")?$('#drpSubNCat'+valuesId[i]).val():null,
+        "ManagerId":ManagerId,
+        "Week":currentDate 
+        
+    };
+
+    $.ajax({
+        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(item),
+        headers: {
+            "Accept": "application/json;odata=verbose",
+            "X-RequestDigest": $("#__REQUESTDIGEST").val()
+        },
+        success: function (data) {
+            console.log(data);
+        },
+        error: function (data) {
+            //console.log(data);
+            CreateErrorLog(listName,data); 
+        }
+    });
+    
+    }
+    else{
+     var item = {
+        "__metadata": { "type": itemType },
+        
+        "Status":param,
+        "CategoriesId":$('#drpCat'+valuesId[i]).val(),
+        "SubCategoriesId":($('#drpSubCat'+valuesId[i]).val() != "--select--")?$('#drpSubCat'+valuesId[i]).val():null,
+        "Effort":($('#hours'+valuesId[i]).val()== "")?0:parseInt($('#hours'+valuesId[i]).val(),10),
+        "UserId":_spPageContextInfo.userId,
+        "SubNCategoryId":($('#drpSubNCat'+valuesId[i]).val() != "--select--")?$('#drpSubNCat'+valuesId[i]).val():null,
+        "ManagerId":ManagerId,
+        "Week":currentDate 
+                
+    };
+
+    $.ajax({
+        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById("+ItemId+")",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(item),
+        headers: {
+            "accept":"application/json;odata=verbose",
+			"content-type": "application/json;odata=verbose",
+			"X-RequestDigest":$("#__REQUESTDIGEST").val(),
+			"X-HTTP-Method": "MERGE",
+			"IF-MATCH":"*"      
+			  },
+        success: function (data) {
+            console.log(data);
+        },
+        error: function (data) {
+            console.log(data);
+            CreateErrorLog(listName,data); 
+
+        }
+    });
+   
+    
+    }
+   
+}
+ //effort tracker tracker-list-nov-9
+ 
+ var urlList = "";	
+    var filter = ""; 	
+    	
+     urlList =  _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('EffortEntryTracker')/items?$select=ID,Week&$filter=UserId eq "+_spPageContextInfo.userId+" and Week ge '" +dayprevious2+ "' and Week le '"+ daynext +"'";	
+		console.log(urlList); 	
+		 var resultArray = [];	
+            				
+    $.ajax({	
+        url: urlList,	
+        type: "GET",	
+        async: false,	
+        headers: { "Accept": "application/json",	
+               "Access-Control-Allow-Origin":"*" },	
+        success: function (data) {	
+        console.log("///////////////////",data);	
+         var effortentry=data.value;	
+ if(effortentry.length >0){	
+    var itemTypes = GetItemTypeForListName("EffortEntryTracker");	
+    var item={	
+    "__metadata": { "type": itemTypes },	
+    "Status" : param	
+    };	
+   $.ajax({	
+        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('EffortEntryTracker')/getItemById("+effortentry[0].ID+")",	
+        type: "POST",	
+        contentType: "application/json;odata=verbose",	
+        data: JSON.stringify(item),	
+        headers: {	
+            "accept":"application/json;odata=verbose",	
+			"content-type": "application/json;odata=verbose",	
+			"X-RequestDigest":$("#__REQUESTDIGEST").val(),	
+			"X-HTTP-Method": "MERGE",	
+			"IF-MATCH":"*"      	
+			  },	
+        success: function (data) {	
+            console.log(data);	
+        },	
+        error: function (data) {	
+            console.log(data);	
+            CreateErrorLog(listName,data); 	
+        }	
+    });	
+}	
+else{
+    console.log("///// save new data to effort entry tracker for flow");
+    var itemTypes = GetItemTypeForListName("EffortEntryTracker");	
+     var item={	
+     "__metadata": { "type": itemTypes },
+         "UserId":_spPageContextInfo.userId,
+         "Week":currentDate, 
+     "Status" : param	
+     };	
+  $.ajax({	
+         url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('EffortEntryTracker')/items",	
+         type: "POST",	
+         contentType: "application/json;odata=verbose",	
+         data: JSON.stringify(item),	
+         headers: {	
+             "accept":"application/json;odata=verbose",		
+             "X-RequestDigest":$("#__REQUESTDIGEST").val(),	
+                       
+               },	
+         success: function (data) {	
+             console.log(data);	
+         },	
+         error: function (data) {	
+             console.log(data);	
+             CreateErrorLog(listName,data); 	
+         }	
+     });	
+     
+ 
+}
+		
+   },	
+        error: function (data) {	
+        //alert('error');	
+      //deferred.resolve(null);	
+        }	
+    });	
+  	
+  	
+//  //end
+//  console.log("1134",allselectedIds);
+//   console.log("1135",allcatId);
+//     console.log("SubCategories1134", SubCategories);
+var unmatchedIds = allcatId.filter(id => !allselectedIds.includes(id.toString()));
+console.log("1137", unmatchedIds);
+
+// Assuming SubCategories is an array of objects with an 'Id' property
+var matchedSubCategories = SubCategories.filter(subCat => unmatchedIds.includes(subCat.Id));
+console.log("1140",matchedSubCategories);
+for (var i = 0; i < matchedSubCategories.length; i++) {
+    var matchedCategory = matchedSubCategories[i];
+    extracat.push(SubCategories[i].Category.Id)
+    console.log("1143",extracat)
+
+    var item = {
+        "__metadata": { "type": itemType },
+        "Status": param,
+        "CategoriesId": matchedCategory.Category.Id, // Use the matched SubCategories ID as CategoriesId
+        "SubCategoriesId":matchedCategory.Id, // Use the matched SubCategories ID as SubCategoriesId
+        "Effort": 0,
+        "UserId": _spPageContextInfo.userId,
+        "ManagerId": ManagerId,
+        "Week": currentDate
+    };
+
+    $.ajax({
+        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(item),
+        headers: {
+            "Accept": "application/json;odata=verbose",
+            "X-RequestDigest": $("#__REQUESTDIGEST").val()
+        },
+        success: function (data) {
+            console.log("1018", data);
+        },
+        error: function (data) {
+            CreateErrorLog(listName, data);
+        }
+    });
+}
+const allCategoryIdSet = new Set(allCategorId);
+const extracatSet = new Set(extracat);
+
+// Find unmatched IDs
+const unmatchedcatIds = [...allCategoryIdSet].filter(id => !extracatSet.has(id));
+
+console.log("1182:", unmatchedcatIds);
+var matchedCategories = Categories.filter(Cat =>unmatchedcatIds.includes(Cat.Id));
+
+for(var j = 0; j < matchedCategories.length; j++) {
+    var getCategoryid =matchedCategories[j];
+   
+
+    var item = {
+        "__metadata": { "type": itemType },
+        "Status": param,
+        "CategoriesId": getCategoryid.Id, // Use the matched SubCategories ID as CategoriesId
+        //"SubCategoriesId":SubCategories[i].Id, // Use the matched SubCategories ID as SubCategoriesId
+        "Effort": 0,
+        "UserId": _spPageContextInfo.userId,
+        "ManagerId": ManagerId,
+        "Week": currentDate
+    };
+
+    $.ajax({
+        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(item),
+        headers: {
+            "Accept": "application/json;odata=verbose",
+            "X-RequestDigest": $("#__REQUESTDIGEST").val()
+        },
+        success: function (data) {
+            console.log("1018", data);
+        },
+        error: function (data) {
+            CreateErrorLog(listName, data);
+        }
+    });
+}
+
+
+
+
+ 
+ if(param == "Saved not Submitted"){
+ alert("Entries saved successfully.");
+
+ setTimeout(function(){
+    $(".se-pre-con").css("display", "none");
+     getEffortDetails($("#fromdate").val());  
+   },2000);
+
+ //window.location.href =_spPageContextInfo.siteAbsoluteUrl + "/Pages/Home.aspx";
+ }
+ else{
+ //12-4-2023- nimisha
+  //end-nimisha
+  alert("Entries submitted successfully.");
+  getEffortDetails(param);
+  getLastWeeksEffort();
+  setTimeout(function(){
+    $(".se-pre-con").css("display", "none"); 
+     getEffortDetails($("#fromdate").val()); 
+   },2000);
+	disableButtons();
+   //window.location.href =_spPageContextInfo.siteAbsoluteUrl + "/Pages/Home.aspx";
+
+ }
+}
+ 
+ }
+ function recallCurrentWeek(){
+ 
+ if(confirm("Do you want to recall submitted entries?")){
+ var listName="EffortTrackingList";
+ var itemType = GetItemTypeForListName("EffortTrackingList");
+//12-4-2023-nimisha
+var noDays=moment($("#fromdate").val()).format('d');	
+   var nextDay=$("#fromdate").val();	
+   noDays=parseInt(noDays,10);	
+  	
+  // for sunday.	
+  	
+  if(noDays==0){	
+  	
+  nextDay= moment($("#fromdate").val()).add(1, "days");	
+ nextDay= moment(nextDay).format("MM/DD/YY"); 	
+  }	
+//	
+  else if(noDays<=6){	
+  var n=6-noDays;	
+  nextDay= moment($("#fromdate").val()).add(n+2, "days");	
+ nextDay= moment(nextDay).format("MM/DD/YY");	
+ 	
+  }	
+ 	
+  else{	
+  	nextDay= moment($("#fromdate").val()).add(6, "days");	
+ 	nextDay= moment(nextDay).format("MM/DD/YY");	
+  	
+  }
+  //end-nimisha
+
+ for(var i=0;i<valuesId.length;i++){
+//console.log($('#Item'+valuesId[i]).val());
+var ItemId=parseInt($('#Item'+valuesId[i]).val(),10);
+console.log(ItemId);
+
+ var item = {
+        "__metadata": { "type": itemType },
+        
+        "Status":'Saved not Submitted'
+                        
+    };
+
+    $.ajax({
+        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById("+ItemId+")",
+        type: "POST",
+        contentType: "application/json;odata=verbose",
+        data: JSON.stringify(item),
+        headers: {
+            "accept":"application/json;odata=verbose",
+			"content-type": "application/json;odata=verbose",
+			"X-RequestDigest":$("#__REQUESTDIGEST").val(),
+			"X-HTTP-Method": "MERGE",
+			"IF-MATCH":"*"      
+			  },
+        success: function (data) {
+            console.log(data);
+        },
+        error: function (data) {
+            console.log(data);
+            CreateErrorLog(listName,data); 
+
+        }
+    });
+    }
+    
+    //-12-4-2023-nimisha
+     var dayprevious = moment(nextDay).add(-1,'days');	
+var dayprevious2= moment(dayprevious).format("YYYY-MM-DD");	
+dayprevious2=dayprevious2+'T00:00:00.000Z';	
+var day2  = moment(nextDay).add(1,'days');	
+var day3= moment(day2).format("YYYY-MM-DD");	
+var daynext=day3+'T00:00:00.000Z';	
+    urlList =  _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('EffortEntryTracker')/items?$select=ID,Week&$filter=UserId eq "+_spPageContextInfo.userId+" and Week ge '" +dayprevious2+ "' and Week le '"+ daynext +"'";	
+		console.log(urlList); 	
+		 var resultArray = [];	
+            				
+    $.ajax({	
+        url: urlList,	
+        type: "GET",	
+        async: false,	
+        headers: { "Accept": "application/json",	
+               "Access-Control-Allow-Origin":"*" },	
+        success: function (data) {	
+        console.log("///////////////////",data);	
+         var effortentry=data.value;	
+		  if(effortentry.length >0){	
+    var itemTypes = GetItemTypeForListName("EffortEntryTracker");	
+    var item={	
+    "__metadata": { "type": itemTypes },	
+    "Status" : "Saved not Submitted"	
+    };	
+ $.ajax({	
+        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('EffortEntryTracker')/getItemById("+effortentry[0].ID+")",	
+        type: "POST",	
+        contentType: "application/json;odata=verbose",	
+        data: JSON.stringify(item),	
+        headers: {	
+            "accept":"application/json;odata=verbose",	
+			"content-type": "application/json;odata=verbose",	
+			"X-RequestDigest":$("#__REQUESTDIGEST").val(),	
+			"X-HTTP-Method": "MERGE",	
+			"IF-MATCH":"*"      	
+			  },	
+        success: function (data) {	
+            console.log(data);	
+        },	
+        error: function (data) {	
+            console.log(data);	
+            CreateErrorLog(listName,data); 	
+        }	
+    });	
+}	
+		
+   },	
+        error: function (data) {	
+        //alert('error');	
+      //deferred.resolve(null);	
+        }	
+    });
+    
+    //end-nimisha
+    
+  setTimeout(function(){
+    $(".se-pre-con").css("display", "none"); 
+    getLastWeeksEffort();
+     getEffortDetails($("#fromdate").val());
+     EnableButtons();  
+   },2000);
+	
+   }
+ }
+  
+function GetItemTypeForListName(name) {
+    return "SP.Data." + name.charAt(0).toUpperCase() + name.split(" ").join("").slice(1) + "ListItem";
+}
+
+function closePopUp() {	
+    $("#ticketDetail").css("display", "none");
+}
+// and Week eq datetime'"+param+"'
+ function getEffortDetails(param) {
+ $('#effortBody').empty();
+  $(".se-pre-con").css("display", "block");  
+
+ valuesId=[];
+ console.log(param);
+ var today=param;
+ var noDays=moment(today).format('d');
+  
+   var WeeknendDay=today;
+   noDays=parseInt(noDays,10);
+  if(noDays<=6 && noDays !=0){
+  var n=6-noDays;
+  WeeknendDay= moment(today).add(n+2, "days");
+ 
+ 
+
+  }
+  else{
+  	WeeknendDay= moment(today).add(0, "days");
+ 	
+
+  
+  }
+  
+  var date1=new Date();
+  date1=moment(date1).format("YYYY-MM-DD")
+//console.log(date1);
+var noDaysToday=moment(date1).format('d');
+  
+   var WeeknendToDay=date1;
+   noDaysToday=parseInt(noDaysToday,10);
+  if(noDaysToday<=6 && noDaysToday!=0){
+  var n=6-noDaysToday;
+  WeeknendToDay= moment(date1).add(n+2, "days");
+ 
+ 
+
+  }
+  else{
+  	WeeknendToDay= moment(date1).add(0, "days");
+ 	
+
+  
+  }
+  var finalCheckDate=moment(WeeknendToDay).format("YYYY-MM-DD")
+finalCheckDate= finalCheckDate+'T00:00:00.000Z';
+
+  
+
+
+ var nextday  = moment(WeeknendDay).add(1,'days');
+
+var curtoday = moment(WeeknendDay).format("YYYY-MM-DD");
+var currentDate = curtoday +'T00:00:00.000Z';
+
+nextday = moment(nextday).format("YYYY-MM-DD");
+var nextDate = nextday+'T00:00:00.000Z';
+ console.log(currentDate );
+ console.log(nextDate);
+ var finalArray = [];
+    var urlList = "";
+    var filter = ""; 
+     urlList =  _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('EffortTrackingList')/items?$select=*,User/Title,User/ID,Categories/Title,Categories/Id,SubCategories/Title,SubCategories/Id,SubNCategory/Id,Manager/Id&$filter=UserId eq "+_spPageContextInfo.userId+" and Week ge datetime'" +currentDate+ "' and Week le datetime'" +nextDate+"'&$expand=Categories,SubCategories,SubNCategory,Manager,User"+"&$orderby=Effort desc,Categories/Title,SubCategories/Title";
+		console.log(urlList); 
+		 var resultArray = [];
+            			//urlList = _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('RemediationTracker')/items";
+    $.ajax({
+        url: urlList,
+        type: "GET",
+        async: false,
+        headers: { "Accept": "application/json",
+               "Access-Control-Allow-Origin":"*" },
+        success: function (data) {
+        
+
+        console.log("1121",data);
+        if(data.value.length>0){
+        
+ 
+ 
+ 
+
+ 
+        AddRowWithValues(data.value)
+        if(data.value[0].Status == "Submitted"){
+        disableButtons();
+        ShowTotalHours();
+         
+        showRecallButton();
+        console.log("81items",data.value[0].Week)
+          
+        var today= new Date(data.value[0].Week);
+         var today1= new Date(today.getFullYear(),today.getMonth(),today.getDate()-today.getDay())
+         console.log("1225",today1)
+         const firstDayofWeek= new Date(today.getFullYear(),today.getMonth(),today.getDate()-today.getDay()-6);
+console.log("first",firstDayofWeek)
+
+const lastDayofWeek= new Date(today.getFullYear(),today.getMonth(),today.getDate()+(6-today.getDay()-6)); 
+console.log("last",lastDayofWeek)
+if(today1>=firstDayofWeek&&today1<=lastDayofWeek)
+{
+console.log("Today date current week");
+document.getElementById("notify").style.display = "none";
+
+} 
+       
+        }
+        else{
+        hideRecallButton();
+        EnableButtons();
+         ShowTotalHours();
+        }
+        }
+        else{
+        //For Fixed Category
+        //AddRow();
+        AddRowFixedCategory();
+        EnableButtons();
+         ShowTotalHours();
+          hideRecallButton();
+          console.log("this date not in current week");
+  document.getElementById("notify").style.display = "block";
+        }
+        //  $(".se-pre-con").css("display", "none");
+        setTimeout(function(){
+
+           $(".se-pre-con").css("display", "none");  
+   		},4000);
+  
+                   },
+        error: function (data) {
+        //alert('error');
+      //deferred.resolve(null);
+      	CreateErrorLog("EffortTrackingList",data); 
+
+        $(".se-pre-con").css("display", "none");  
+        }
+    });
+    console.log("FInalArray" + finalArray);
+	return finalArray;
+       
+}
+function getEffortDetailsWithId(param1) {
+var param=param1;
+console.log(param);
+for(var i=0;i<valuesId.length;i++){
+var id=valuesId[i];
+if(parseInt($('#Item'+id).val(),10)>0){
+deleteValuesFromList(parseInt($('#Item'+id).val(),10));
+}
+
+}
+ 
+ valuesId=[];
+ console.log(param);
+ var today=param;
+ var nextday  = moment(today).add(1,'days');
+
+today = moment(today).format("YYYY-MM-DD");
+var currentDate = today+'T00:00:00.000Z';
+
+nextday = moment(nextday).format("YYYY-MM-DD");
+var nextDate = nextday+'T00:00:00.000Z';
+ console.log(currentDate );
+ console.log(nextDate);
+ id=0;
+ var finalArray = [];
+    var urlList = "";
+    var filter = ""; 
+    $('#effortBody').empty();
+     urlList =  _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('EffortTrackingList')/items?$select=*,User/Title,User/ID,Categories/Title,Categories/Id,SubCategories/Title,SubCategories/Id,SubNCategory/Id,Manager/Id&$filter=UserId eq "+_spPageContextInfo.userId+" and Week ge datetime'" +currentDate+ "' and Week le datetime'" +nextDate+"' and Status eq 'Submitted'&$expand=Categories,SubCategories,SubNCategory,Manager,User"+"";
+		console.log(urlList); 
+		 var resultArray = [];
+            			//urlList = _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('RemediationTracker')/items";
+    $.ajax({
+        url: urlList,
+        type: "GET",
+        async: false,
+        headers: { "Accept": "application/json",
+               "Access-Control-Allow-Origin":"*" },
+        success: function (data) {
+        console.log(data,'data');
+        if(data.value.length>0){
+        AddRowWithValuesId(data.value);
+                
+       for(let i=0;i<data.value.length;i++){
+       //AddRowWithValuesId(data.value[i]);
+       id++;
+         let getObj=Categories.filter((res)=>res.Title==data.value[i]?.Categories.Title);
+  console.log(getObj,data.value[i]?.Categories.Title,'testing');
+  if((getObj[0].MandatorySubcategory==true)){
+console.log('if loop',id,'id')
+$(".starcat"+id).css('display', 'inline');
+
+
+}
+else if((getObj[0].MandatorySubcategory==null && getObj[0].MandatorySubcategory==false)){
+console.log('else loop')
+flag1=false;
+$(".starcat"+id).css('display', 'none');
+}
+}
+
+        }
+                          },
+        error: function (data) {
+        //alert('error');
+      //deferred.resolve(null);
+        }
+    });
+    console.log("FInalArray" + finalArray);
+	return finalArray;
+       
+}
+function getLastWeeksEffort(){
+var urlList = "";
+    var filter = ""; 
+     urlList =  _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('EffortTrackingList')/items?$select=Week&$filter=UserId eq "+_spPageContextInfo.userId+" and Status eq 'Submitted'&$orderby=Modified desc&$top=100"+"";
+		console.log(urlList); 
+		 var resultArray = [];
+            			//urlList = _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('RemediationTracker')/items";
+    $.ajax({
+        url: urlList,
+        type: "GET",
+        async: false,
+        headers: { "Accept": "application/json",
+               "Access-Control-Allow-Origin":"*" },
+        success: function (data) {
+        console.log("1235",data);
+         var dateval=[];
+
+        if(data.value.length >0){
+        //showPopupValues(data.value);
+        var dateval=[];
+        for(var i=0;i<data.value.length;i++){
+         var today=data.value[i].Week;
+
+        today = moment(today).format("YYYY-MM-DD");
+        dateval.push(today);
+
+        }
+        dateval=[... new Set(dateval)];
+        dateval=dateval.slice(0,4);
+        console.log(dateval);
+         showPopupValues(dateval);
+
+        
+        }
+        else{
+         showPopupValues(dateval);
+
+        }
+                           },
+        error: function (data) {
+        //alert('error');
+      //deferred.resolve(null);
+        }
+    });
+}
+
+function showPopupValues(param){
+$('#PrevBox').empty();
+var html="";
+if(param.length ==0){
+html+='<div><span><b>No recent data found</b></span></div>';
+}
+else{
+ for(var i=0;i<param.length;i++){
+ var today=param[i];
+ //add(1,'days');
+ var prevDay= moment(today).subtract(4, "days");
+ prevDay = moment(prevDay).format("MM/DD/YYYY");
+today = moment(today).format("MM/DD/YYYY");
+
+ 
+ html+='<div style="margin-bottom:5px;"><span><b>'+prevDay+" -  " +today +'   </b></span>'+
+ 		'<button type="button" class="buttonRowAdd popButtons" id="'+param[i]+'" onclick="getEffortDetailsWithId(this.id)">Select</button>'+
+   '</div>';
+ 		
+ }
+}
+$('#PrevBox').append(html);
+}
+function showEffort(param){
+console.log("show efforts:" + param);
+$(".se-pre-con").css("display", "block");
+
+  $("#tblDashboard").DataTable().destroy();
+  
+var efforts=getEffortDetails(param);
+console.log("Efforts" + efforts);
+
+ var finalAllHTML ='';
+ var filterManager ='';
+ var filterAll='';
+
+
+
+           if (efforts!= null && efforts.length > 0) {
+            for (var i = 0; i < efforts.length; i++) {
+            
+            
+            console.log("previou week");
+             			                                        
+            						
+				var category="";
+				if(efforts[i].Categories.Title !=null)
+					category=efforts[i].Categories.Title;	
+				var subcategory="";
+				if(efforts[i].SubCategories.Title !=null)
+					subcategory=efforts[i].SubCategories.Title;
+				var subSubcategory="";
+				if(efforts[i].SubNCategory.Title !=null)
+				    subSubcategory=efforts[i].SubNCategory.Title;
+				
+				
+
+               
+			 var HTML='<tr><td>'+  +'</td>';
+	
+				       HTML+='<td data-toggle="tooltip" title=' + category + '>' + category + '</td>';
+                HTML+='<td title="tst">' + subcategory  + '</td>';
+                HTML+='<td>' + subSubcategory + '</td>';
+                HTML+='<td>'+Mon-Fri+'</td></tr>';
+                                                              
+               // HTML+='<td><a target="_self" href="' + linkToRemedy + '">' + remID + '</a></td>'
+                	console.log(HTML);			
+				//HTML+='<td>' + finalDueDate + '</td></tr>';
+                  finalAllHTML += HTML;
+                $("#tblDashboardBody").html(finalAllHTML);
+                //allCount += 1;
+              
+                             
+            
+            }
+           }
+                     // $("#tblManageRequestsBody").html(html);
+          
+	      
+           
+            $("#tblDashBoard").DataTable().clear();
+            $("#tblDashBoard").DataTable().destroy();
+                       
+	        createDatatable(); 
+	      
+	   //   $(".dispBuffer").css("display", "none");
+	      setTimeout(()=> {$(".se-pre-con").css("display", "none")},600 );
+	      
+
+}
+
+function createDatatable() {
+   // var isadmin=validateUser("PRT Site Admin-Dev");
+   console.log("create table");
+  
+   
+    var colDefs = [
+            { "width": "10%", "targets": 0, "className": 'dt-body-left' },
+            { "width": "10%", "targets": 1, "className": 'dt-body-left' },
+            { "width": "10%", "targets": 2, "className": 'dt-body-left' },
+            { "width": "5%", "targets": 3, "className": 'dt-body-left' },
+            { "width": "5%", "targets": 4, "className": 'dt-body-left' },
+           // { "width": "5%", "targets": 5, "className": 'dt-body-left' },
+           // { "width": "5%", "targets": 6, "className": 'dt-body-left' },
+          //  { "width": "5%", "targets": 7, "className": 'dt-body-left' },
+          //  { "width": "5%", "targets": 8, "className": 'dt-body-left' },
+           // { "width": "10%", "targets": 9, "className": 'dt-body-left' },
+           // { "width": "5%", "targets": 10, "className": 'dt-body-left' },
+
+];
+    $("#tblDashBoard").DataTable().clear();
+    var table = $("#tblDashboard").DataTable({        
+        scrollX: false,
+        scrollCollapse: true,
+        autoWidth: true,
+        //paging: true,
+        columnDefs: colDefs,
+        bSortCellsTop: true,
+        bSort: true,
+         orderCellsTop: true,
+   		 responsive: true,
+   		  language: {
+      "emptyTable": "No records to display"
+    },
+        dom: '<B>lftip',
+        buttons: [
+				 {
+                           }],
+            
+	});
+	$('.dt-buttons')
+    .appendTo( $('.exceldownload'));
+    var btn = $(".dt-button");
+    btn.removeClass();
+    btn.addClass('btn btn-outline-primary smallbtn');
+	//var isadmin=validateUser("PRT Site Admin-Dev");
+	
+	$("#tblDashboard thead .filterh").each(function (i) {	
+		var colIndex=i;
+	 	 var isfilter = (i == 0 ? true : false);
+	  var select = $('<select style="width:90%"><option value="clear">' + '</option></select>')
+                .appendTo($(this).empty())
+                .on('change', function () {
+                    var val = $(this).val();
+					if(val == 'clear')
+					{
+						table.column(colIndex)
+                        .search('', true, false)
+                        .draw();
+
+					}
+                    else
+                    {
+							var escape_parenthesis = new RegExp( '(\\' + [ '(', ')'].join('|\\') + ')', 'g' );        
+                            var searchtext = $(this).val().replace( escape_parenthesis, '\\$1' );   
+
+                            table.column(colIndex)
+                                .search('^' + searchtext + '$', true, false)
+                                .draw(); 
+                                   }
+                });
+                
+                if(isfilter){
+                    var remItems = [];
+                    table.column(colIndex).nodes().to$().each(function (d, j) {
+                        var thisRem = $(j)[0].innerText;
+                        if ($.inArray(thisRem, remItems) === -1) remItems.push(thisRem);
+                    });
+
+                    remItems.sort();
+
+                    $.each(remItems, function (i, item) {
+                        select.append('<option value="' + item + '">' + item + '</option>');
+                    });
+                }
+                else{
+                table.column(colIndex).data().unique().sort().each(function (d, j) {
+                    if (d === '') {
+                        d = '(Empty)';
+                    }
+                    select.append('<option value="' + (d=='(Empty)'?'':d) + '">' + d + '</option>');
+                });  
+                }
+
+
+				});
+
+ }
+  
+
+
+===================
+==
 var selectedcat = ['Business/administrative matters under 5% effort', 'Pre-CAN (ESD, LD, CS) support'];
 var selectedsubcat = ['Test1', 'Preliminary FTO or patentability, including patent landscape analysis'];
 
