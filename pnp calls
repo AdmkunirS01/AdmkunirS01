@@ -1,3 +1,20 @@
+for (var i = 0; i < getallids.length; i++) {
+    var itemId = getallids[i];
+
+    // Find the corresponding object in retrivealldata
+    var matchingObject = retrivealldata.find(obj => obj.ID === itemId);
+
+    if (matchingObject) {
+        // Item ID exists in retrivealldata, do something
+        console.log("Item with ID " + itemId + " exists in retrivealldata");
+    } else {
+        // Item ID doesn't exist in retrivealldata, do something else
+        console.log("Item with ID " + itemId + " does not exist in retrivealldata");
+    }
+}
+
+================
+
 // Your arrays and object
 var getallids = [0, 110066, 110078, 110082, 110092, 110075, 110094, 110083, 110081, 110086, 110088, 110091, 110080, 110087, 110077, 110073, 110067, 110089, 110085, 110079, 110076, 110071, 110074, 110069, 110072, 110070, 110068, 110093, 110084, 110090, 0];
 var retrivealldata = { 0: 1100911, 2: 110087, 3: 110093, 4: 110084, 5: 110071 };
