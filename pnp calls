@@ -1,3 +1,31 @@
+var catids = 6;
+var subcats = 25;
+
+var retrievalData = [
+  { CategoriesId: 6, ID: 110639, Id: 110639, Effort: 15, SubCategoriesId: 25, ManagerId: 40, Status: "Saved not Submitted" },
+  { CategoriesId: 4, ID: 110639, Id: 110632, Effort: 15, SubCategoriesId: 24, ManagerId: 40, Status: "Saved not Submitted" },
+  { CategoriesId: 2, ID: 110639, Id: 110633, Effort: 15, SubCategoriesId: 23, ManagerId: 40, Status: "Saved not Submitted" }
+];
+
+function findMatchingID(catids, subcats, data) {
+  for (var i = 0; i < data.length; i++) {
+    if (data[i].CategoriesId === catids && data[i].SubCategoriesId === subcats) {
+      return data[i].ID;
+    }
+  }
+  // Return null if no match is found
+  return null;
+}
+
+var matchingID = findMatchingID(catids, subcats, retrievalData);
+
+if (matchingID !== null) {
+  console.log("Matching ID found:", matchingID);
+} else {
+  console.log("No matching ID found");
+}
+
+==========
 CategoriesId
 : 
 6
