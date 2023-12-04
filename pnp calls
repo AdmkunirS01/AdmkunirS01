@@ -1,4 +1,74 @@
- console.log("1038",retrivealldata)
+CategoriesId
+: 
+6
+ComplianceAssetId
+: 
+null
+ContentTypeId
+: 
+"0x01003C191805F8DBB144B17DB0850735CBD2006AC1F6627CCB8241988DF40FDF073768"
+Created
+: 
+"2023-12-04T07:16:34Z"
+EditorId
+: 
+86
+Effort
+: 
+15
+FileSystemObjectType
+: 
+0
+GUID
+: 
+"5f5686a1-dc70-46b4-b89f-0344a3469f3a"
+ID
+: 
+110639
+Id
+: 
+110639
+Manager
+: 
+{odata.type: 'SP.Data.UserInfoItem', odata.id: '36928539-08d3-4b01-a2b8-30a535d7d671', Id: 40}
+Manager@odata.navigationLinkUrl
+: 
+"Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110639)/Manager"
+ManagerId
+: 
+40
+ManagerStringId
+: 
+"40"
+Modified
+: 
+"2023-12-04T07:16:34Z"
+OData__ColorTag
+: 
+null
+OData__UIVersionString
+: 
+"1.0"
+ServerRedirectedEmbedUri
+: 
+null
+ServerRedirectedEmbedUrl
+: 
+""
+Status
+: 
+"Saved not Submitted"
+SubCategories
+: 
+{odata.type: 'SP.Data.SubcategoriesListItem', odata.id: '52dd218a-01cd-4366-8390-27dcdf93424b', Title: 'Test1', Id: 25}
+SubCategories@odata.navigationLinkUrl
+: 
+"Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110639)/SubCategories"
+SubCategoriesId
+: 
+25
+========
+console.log("1038",retrivealldata)
     var catids=$('#drpCat'+valuesId[i]).val();
     var subcats=($('#drpSubCat'+valuesId[i]).val() != "--select--")?$('#drpSubCat'+valuesId[i]).val():null;
     console.log("Getcat,subcat",catids,subcats);
