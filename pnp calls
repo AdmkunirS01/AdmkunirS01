@@ -1,3 +1,29 @@
+ console.log("1038",retrivealldata)
+    var catids=$('#drpCat'+valuesId[i]).val();
+    var subcats=($('#drpSubCat'+valuesId[i]).val() != "--select--")?$('#drpSubCat'+valuesId[i]).val():null;
+    console.log("Getcat,subcat",catids,subcats);
+0
+: 
+{odata.type: 'SP.Data.EffortTrackingListListItem', odata.id: 'c328eea3-858d-41a0-82b0-079181e50803', odata.etag: '"1"', odata.editLink: "Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110610)", User@odata.navigationLinkUrl: "Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110610)/User", …}
+1
+: 
+{odata.type: 'SP.Data.EffortTrackingListListItem', odata.id: 'ab09a51d-2308-4a20-93b6-9cfaf390ffb4', odata.etag: '"1"', odata.editLink: "Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110619)", User@odata.navigationLinkUrl: "Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110619)/User", …}
+2
+: 
+{odata.type: 'SP.Data.EffortTrackingListListItem', odata.id: 'ebd7bc7e-e82b-4456-841f-a4cc5e617746', odata.etag: '"1"', odata.editLink: "Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110614)", User@odata.navigationLinkUrl: "Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110614)/User", …}
+3
+: 
+{odata.type: 'SP.Data.EffortTrackingListListItem', odata.id: 'e0eddd9b-f551-4558-9c28-36e0c87c8e43', odata.etag: '"1"', odata.editLink: "Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110632)", User@odata.navigationLinkUrl: "Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110632)/User", …}
+4
+: 
+{odata.type: 'SP.Data.EffortTrackingListListItem', odata.id: '94d67118-4c44-4ebe-ac04-2535dde56960', odata.etag: '"1"', odata.editLink: "Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110616)", User@odata.navigationLinkUrl: "Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110616)/User", …}
+5
+: 
+{odata.type: 'SP.Data.EffortTrackingListListItem', odata.id: '27e319b8-2f27-406e-aba6-2766e7cf106a', odata.etag: '"1"', odata.editLink: "Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110638)", User@odata.navigationLinkUrl: "Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110638)/User", …}
+6
+: 
+{odata.type: 'SP.Data.EffortTrackingListListItem', odata.id: '20701ad3-b578-47da-b783-6fd8d1007958', odata.etag: '"1"', odata.editLink: "Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110621)", User@odata.navigationLinkUrl: "Web/Lists(guid'dd12f0bf-0315-4489-bd14-4eeacc677386')/Items(110621)/User", …}
+============
 // Iterate through the getallids array
 for (var i = 0; i < getallids.length; i++) {
     var itemIdToCheck = getallids[i];
