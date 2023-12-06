@@ -1,4 +1,86 @@
- for (var i = 0; i < valuesId.length; i++) {
+function findMatchingID(catids, subcats, data) {
+    for (var i = 0; i < data.length; i++) {
+        if (data[i].CategoriesId === catids && data[i].SubCategoriesId === subcats) {
+            return data[i].ID;
+        }
+    }
+    // Return null if no match is found
+    return null;
+}
+
+function updateItem(item, itemId, matchingID) {
+    return new Promise(function(resolve, reject) {
+        var headers = {
+            "accept": "application/json;odata=verbose",
+            "content-type": "application/json;odata=verbose",
+            "X-RequestDigest": $("#__REQUESTDIGEST").val(),
+            "X-HTTP-Method": "MERGE",
+            "IF-MATCH": "*"
+        };
+
+        var url = (matchingID !== null)
+            ? _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById(" + matchingID + ")"
+            : _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items";
+
+        $.ajax({
+            url: url,
+            type: "POST",
+            contentType: "application/json;odata=verbose",
+            data: JSON.stringify(item),
+            headers: headers,
+            success: function (data) {
+                console.log(data);
+                resolve(data);
+            },
+            error: function (data) {
+                console.log(data);
+                CreateErrorLog(listName, data);
+                reject(data);
+            }
+        });
+    });
+}
+
+async function updateItems() {
+    for (var i = 0; i < valuesId.length; i++) {
+        // ... (other code remains unchanged)
+
+        var matchingID = findMatchingID(catids, subcats, retrivealldata);
+
+        if (ItemId == 0) {
+            // ... (other code remains unchanged)
+        } else if (emptyhourscheck != 0) {
+            var item = {
+                "__metadata": { "type": itemType },
+                // ... (other code remains unchanged)
+            };
+
+            try {
+                await updateItem(item, ItemId, matchingID);
+            } catch (error) {
+                // Handle error if needed
+            }
+        } else if (emptyhourscheck == 0) {
+            var item = {
+                "__metadata": { "type": itemType },
+                // ... (other code remains unchanged)
+            };
+
+            try {
+                await updateItem(item, ItemId, matchingID);
+            } catch (error) {
+                // Handle error if needed
+            }
+        }
+    }
+}
+
+// Call the async function
+updateItems();
+
+====================
+
+for (var i = 0; i < valuesId.length; i++) {
             console.log($('#Item' + valuesId[i]).val());
             var ItemId = parseInt($('#Item' + valuesId[i]).val(), 10);
             allselectedIds.push($('#drpSubCat' + valuesId[i]).val());
