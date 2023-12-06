@@ -1,3 +1,481 @@
+function SubmitEffortDetails(param) {
+    $(".se-pre-con").css("display", "block");
+
+    if (validateValues() == false || validateHours() == false) {
+        if (validateValues() == false) {
+            if (flag2 == false) {
+                alert("Category and Total % are mandatory.");
+                $(".se-pre-con").css("display", "none");
+            }
+            else {
+                alert("Category and Total % and Sub-Category are mandatory.");
+                $(".se-pre-con").css("display", "none");
+            }
+        }
+
+
+        else if (validateHours() == false) {
+            alert("Total (%) should not exceed " + _totalEffortLimit + ".");
+            $(".se-pre-con").css("display", "none");
+
+        }
+        return;
+    }
+
+    else {
+        if (checkFormattedHours(valuesId) == false) {
+            alert("Please submit entries in 5% intervals.");
+            $(".se-pre-con").css("display", "none");
+            return;
+        }
+        if (param == "Submitted") {
+            if (confirm("Do you want to submit the entries? ") == false) {
+                $(".se-pre-con").css("display", "none");
+                return;
+            }
+        }
+
+        var noDays = moment($("#fromdate").val()).format('d');
+
+        var nextDay = $("#fromdate").val();
+        noDays = parseInt(noDays, 10);
+
+        // for sunday.
+
+        if (noDays == 0) {
+
+            nextDay = moment($("#fromdate").val()).add(1, "days");
+            nextDay = moment(nextDay).format("MM/DD/YY");
+
+        }
+        //
+        else if (noDays <= 6) {
+            var n = 6 - noDays;
+            nextDay = moment($("#fromdate").val()).add(n + 2, "days");
+            nextDay = moment(nextDay).format("MM/DD/YY");
+
+
+        }
+
+
+        else {
+            nextDay = moment($("#fromdate").val()).add(6, "days");
+            nextDay = moment(nextDay).format("MM/DD/YY");
+
+
+        }
+        var today = moment(nextDay).format("YYYY-MM-DD");
+        var currentDate = today + 'T00:00:00.000Z';
+        //changes added on-12-4-2023-nimisha
+        var dayprevious = moment(nextDay).add(-1, 'days');
+        var dayprevious2 = moment(dayprevious).format("YYYY-MM-DD");
+        dayprevious2 = dayprevious2 + 'T00:00:00.000Z';
+        var day2 = moment(nextDay).add(1, 'days');
+        var day3 = moment(day2).format("YYYY-MM-DD");
+        var daynext = day3 + 'T00:00:00.000Z';
+        //end
+        console.log(currentDate);
+        var listName = "EffortTrackingList";
+        var itemType = GetItemTypeForListName("EffortTrackingList");
+
+
+        for (var i = 0; i < valuesId.length; i++) {
+            console.log($('#Item' + valuesId[i]).val());
+            var ItemId = parseInt($('#Item' + valuesId[i]).val(), 10);
+            allselectedIds.push($('#drpSubCat' + valuesId[i]).val());
+            getallids.push(ItemId)
+            console.log("getallids", getallids);
+            console.log(currentDate);
+            console.log("1038", retrivealldata)
+
+var emptyhourscheck= ($('#hours' + valuesId[i]).val() == "") ? 0 : parseInt($('#hours' + valuesId[i]).val(), 10);
+            function findMatchingID(catids, subcats, data) {
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].CategoriesId === catids && data[i].SubCategoriesId === subcats) {
+                        return data[i].ID;
+                    }
+                }
+                // Return null if no match is found
+                return null;
+            }
+            if (ItemId == 0) {
+                console.log("1038", retrivealldata)
+                var catids = parseInt($('#drpCat' + valuesId[i]).val());
+                var subcats = (parseInt($('#drpSubCat' + valuesId[i]).val()) != "--select--") ? parseInt($('#drpSubCat' + valuesId[i]).val()) : null;
+
+                matchingID = findMatchingID(catids, subcats, retrivealldata);
+
+                if (matchingID !== null) //update with exsting item
+                {
+                    var item = {
+                        "__metadata": { "type": itemType },
+
+                        "Status": param,
+                        "CategoriesId": catids,
+                        "SubCategoriesId": subcats,
+                        "Effort": ($('#hours' + valuesId[i]).val() == "") ? 0 : parseInt($('#hours' + valuesId[i]).val(), 10),
+                        "UserId": _spPageContextInfo.userId,
+                        //"SubNCategoryId":($('#drpSubNCat'+valuesId[i]).val() != "--select--")?$('#drpSubNCat'+valuesId[i]).val():null,
+                        "ManagerId": ManagerId,
+                        "Week": currentDate
+
+                    };
+                    var headers = {
+                        "accept": "application/json;odata=verbose",
+                        "content-type": "application/json;odata=verbose",
+                        "X-RequestDigest": $("#__REQUESTDIGEST").val(),
+                        "X-HTTP-Method": "MERGE",
+                        "IF-MATCH": "*"
+                    };
+                    $.ajax({
+                        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById(" + matchingID + ")",
+                        type: "POST",
+                        contentType: "application/json;odata=verbose",
+                        data: JSON.stringify(item),
+                        headers: headers,
+
+                        success: function (data) {
+                            console.log(data);
+                        },
+                        error: function (data) {
+                            console.log(data);
+                            CreateErrorLog(listName, data);
+
+                        }
+                    });
+
+                }
+                else // crete new items
+                {
+                    var item = {
+                        "__metadata": { "type": itemType },
+
+                        "Status": param,
+                        "CategoriesId": $('#drpCat' + valuesId[i]).val(),
+                        "SubCategoriesId": ($('#drpSubCat' + valuesId[i]).val() != "--select--") ? $('#drpSubCat' + valuesId[i]).val() : null,
+                        "Effort": ($('#hours' + valuesId[i]).val() == "") ? 0 : parseInt($('#hours' + valuesId[i]).val(), 10),
+                        "UserId": _spPageContextInfo.userId,
+                        "SubNCategoryId": ($('#drpSubNCat' + valuesId[i]).val() != "--select--") ? $('#drpSubNCat' + valuesId[i]).val() : null,
+                        "ManagerId": ManagerId,
+                        "Week": currentDate
+
+                    };
+
+                    $.ajax({
+                        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+                        type: "POST",
+                        contentType: "application/json;odata=verbose",
+                        data: JSON.stringify(item),
+                        headers: {
+                            "Accept": "application/json;odata=verbose",
+                            "X-RequestDigest": $("#__REQUESTDIGEST").val()
+                        },
+                        success: function (data) {
+                            console.log(data);
+                        },
+                        error: function (data) {
+                            //console.log(data);
+                            CreateErrorLog(listName, data);
+                        }
+                    });
+                }
+
+
+
+
+            }
+
+            else if(emptyhourscheck!=0){
+                 var item = {
+                    "__metadata": { "type": itemType },
+
+                    "Status":param,
+                    "CategoriesId":$('#drpCat'+valuesId[i]).val(),
+                    "SubCategoriesId":($('#drpSubCat'+valuesId[i]).val() != "--select--")?$('#drpSubCat'+valuesId[i]).val():null,
+                    "Effort":($('#hours'+valuesId[i]).val()== "")?0:parseInt($('#hours'+valuesId[i]).val(),10),
+                    "UserId":_spPageContextInfo.userId,
+                    "SubNCategoryId":($('#drpSubNCat'+valuesId[i]).val() != "--select--")?$('#drpSubNCat'+valuesId[i]).val():null,
+                    "ManagerId":ManagerId,
+                    "Week":currentDate 
+
+                };
+
+                $.ajax({
+                    url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById("+ItemId+")",
+                    type: "POST",
+                    contentType: "application/json;odata=verbose",
+                    data: JSON.stringify(item),
+                    headers: {
+                        "accept":"application/json;odata=verbose",
+                		"content-type": "application/json;odata=verbose",
+                		"X-RequestDigest":$("#__REQUESTDIGEST").val(),
+                		"X-HTTP-Method": "MERGE",
+                		"IF-MATCH":"*"      
+                		  },
+                    success: function (data) {
+                        console.log(data);
+                    },
+                    error: function (data) {
+                        console.log(data);
+                        CreateErrorLog(listName,data); 
+
+                    }
+                });
+
+
+            }
+            else if(emptyhourscheck==0)
+            {
+                var item = {
+                    "__metadata": { "type": itemType },
+
+                    "Status":param,
+                    "CategoriesId":$('#drpCat'+valuesId[i]).val(),
+                    "SubCategoriesId":($('#drpSubCat'+valuesId[i]).val() != "--select--")?$('#drpSubCat'+valuesId[i]).val():null,
+                    "Effort":($('#hours'+valuesId[i]).val()== "")?0:parseInt($('#hours'+valuesId[i]).val(),10),
+                    "UserId":_spPageContextInfo.userId,
+                    "SubNCategoryId":($('#drpSubNCat'+valuesId[i]).val() != "--select--")?$('#drpSubNCat'+valuesId[i]).val():null,
+                    "ManagerId":ManagerId,
+                    "Week":currentDate 
+
+                };
+
+                $.ajax({
+                    url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById("+ItemId+")",
+                    type: "POST",
+                    contentType: "application/json;odata=verbose",
+                    data: JSON.stringify(item),
+                    headers: {
+                        "accept":"application/json;odata=verbose",
+                		"content-type": "application/json;odata=verbose",
+                		"X-RequestDigest":$("#__REQUESTDIGEST").val(),
+                		"X-HTTP-Method": "MERGE",
+                		"IF-MATCH":"*"      
+                		  },
+                    success: function (data) {
+                        console.log(data);
+                    },
+                    error: function (data) {
+                        console.log(data);
+                        CreateErrorLog(listName,data); 
+
+                    }
+                });
+
+
+            }
+        }
+
+        //effort tracker tracker-list-nov-9
+
+        var urlList = "";
+        var filter = "";
+
+        urlList = _spPageContextInfo.webAbsoluteUrl + "/_api/web/lists/getbytitle('EffortEntryTracker')/items?$select=ID,Week&$filter=UserId eq " + _spPageContextInfo.userId + " and Week ge '" + dayprevious2 + "' and Week le '" + daynext + "'";
+        console.log(urlList);
+        var resultArray = [];
+
+        $.ajax({
+            url: urlList,
+            type: "GET",
+            async: false,
+            headers: {
+                "Accept": "application/json",
+                "Access-Control-Allow-Origin": "*"
+            },
+            success: function (data) {
+                console.log("///////////////////", data);
+                var effortentry = data.value;
+                if (effortentry.length > 0) {
+                    var itemTypes = GetItemTypeForListName("EffortEntryTracker");
+                    var item = {
+                        "__metadata": { "type": itemTypes },
+                        "Status": param
+                    };
+                    $.ajax({
+                        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('EffortEntryTracker')/getItemById(" + effortentry[0].ID + ")",
+                        type: "POST",
+                        contentType: "application/json;odata=verbose",
+                        data: JSON.stringify(item),
+                        headers: {
+                            "accept": "application/json;odata=verbose",
+                            "content-type": "application/json;odata=verbose",
+                            "X-RequestDigest": $("#__REQUESTDIGEST").val(),
+                            "X-HTTP-Method": "MERGE",
+                            "IF-MATCH": "*"
+                        },
+                        success: function (data) {
+                            console.log(data);
+                        },
+                        error: function (data) {
+                            console.log(data);
+                            CreateErrorLog(listName, data);
+                        }
+                    });
+                }
+                else {
+                    console.log("///// save new data to effort entry tracker for flow");
+                    var itemTypes = GetItemTypeForListName("EffortEntryTracker");
+                    var item = {
+                        "__metadata": { "type": itemTypes },
+                        "UserId": _spPageContextInfo.userId,
+                        "Week": currentDate,
+                        "Status": param
+                    };
+                    $.ajax({
+                        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('EffortEntryTracker')/items",
+                        type: "POST",
+                        contentType: "application/json;odata=verbose",
+                        data: JSON.stringify(item),
+                        headers: {
+                            "accept": "application/json;odata=verbose",
+                            "X-RequestDigest": $("#__REQUESTDIGEST").val(),
+
+                        },
+                        success: function (data) {
+                            console.log(data);
+                        },
+                        error: function (data) {
+                            console.log(data);
+                            CreateErrorLog(listName, data);
+                        }
+                    });
+
+
+                }
+
+            },
+            error: function (data) {
+                //alert('error');	
+                //deferred.resolve(null);	
+            }
+        });
+
+
+        //  //end
+        //  console.log("1134",allselectedIds);
+        //   console.log("1135",allcatId);
+        //     console.log("SubCategories1134", SubCategories);
+        var unmatchedIds = allcatId.filter(id => !allselectedIds.includes(id.toString()));
+        console.log("1137", unmatchedIds);
+
+        // Assuming SubCategories is an array of objects with an 'Id' property
+        var matchedSubCategories = SubCategories.filter(subCat => unmatchedIds.includes(subCat.Id));
+        console.log("1140", matchedSubCategories);
+        for (var i = 0; i < matchedSubCategories.length; i++) {
+            var matchedCategory = matchedSubCategories[i];
+            extracat.push(SubCategories[i].Category.Id)
+            console.log("1143", extracat)
+
+            var item = {
+                "__metadata": { "type": itemType },
+                "Status": param,
+                "CategoriesId": matchedCategory.Category.Id, // Use the matched SubCategories ID as CategoriesId
+                "SubCategoriesId": matchedCategory.Id, // Use the matched SubCategories ID as SubCategoriesId
+                "Effort": 0,
+                "UserId": _spPageContextInfo.userId,
+                "ManagerId": ManagerId,
+                "Week": currentDate
+            };
+
+            $.ajax({
+                url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+                type: "POST",
+                contentType: "application/json;odata=verbose",
+                data: JSON.stringify(item),
+                headers: {
+                    "Accept": "application/json;odata=verbose",
+                    "X-RequestDigest": $("#__REQUESTDIGEST").val()
+                },
+                success: function (data) {
+                    console.log("1018", data);
+                },
+                error: function (data) {
+                    CreateErrorLog(listName, data);
+                }
+            });
+        }
+        const allCategoryIdSet = new Set(allCategorId);
+        const extracatSet = new Set(extracat);
+
+        // Find unmatched IDs
+        const unmatchedcatIds = [...allCategoryIdSet].filter(id => !extracatSet.has(id));
+
+        console.log("1182:", unmatchedcatIds);
+        var matchedCategories = Categories.filter(Cat => unmatchedcatIds.includes(Cat.Id));
+        // if( matchingID!==0)
+        // {
+        // for(var j = 0; j < matchedCategories.length; j++) {
+        //     var getCategoryid =matchedCategories[j];
+
+
+        //     var item = {
+        //         "__metadata": { "type": itemType },
+        //         "Status": param,
+        //         "CategoriesId": getCategoryid.Id, // Use the matched SubCategories ID as CategoriesId
+        //         //"SubCategoriesId":SubCategories[i].Id, // Use the matched SubCategories ID as SubCategoriesId
+        //         "Effort": 0,
+        //         "UserId": _spPageContextInfo.userId,
+        //         "ManagerId": ManagerId,
+        //         "Week": currentDate
+        //     };
+
+        //     $.ajax({
+        //         url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+        //         type: "POST",
+        //         contentType: "application/json;odata=verbose",
+        //         data: JSON.stringify(item),
+        //         headers: {
+        //             "Accept": "application/json;odata=verbose",
+        //             "X-RequestDigest": $("#__REQUESTDIGEST").val()
+        //         },
+        //         success: function (data) {
+        //             console.log("1018", data);
+        //         },
+        //         error: function (data) {
+        //             CreateErrorLog(listName, data);
+        //         }
+        //     });
+        // }
+        // }
+
+
+
+
+
+        if (param == "Saved not Submitted") {
+
+
+            setTimeout(function () {
+                $(".se-pre-con").css("display", "none");
+                getEffortDetails($("#fromdate").val());
+            }, 2000);
+
+            setTimeout(function () {
+                alert("Entries saved successfully.");
+            }, 2000);
+            //alert("Entries saved successfully.");
+            //window.location.href =_spPageContextInfo.siteAbsoluteUrl + "/Pages/Home.aspx";
+        }
+        else {
+            //12-4-2023- nimisha
+            //end-nimisha
+
+            getEffortDetails(param);
+            getLastWeeksEffort();
+            setTimeout(function () {
+                $(".se-pre-con").css("display", "none");
+                getEffortDetails($("#fromdate").val());
+            }, 2000);
+            disableButtons();
+            //window.location.href =_spPageContextInfo.siteAbsoluteUrl + "/Pages/Home.aspx";
+            alert("Entries submitted successfully.");  
+        }
+    }
+
+}
+=======================
+
 function findMatchingID(catids, subcats, data) {
     for (var i = 0; i < data.length; i++) {
         if (data[i].CategoriesId === catids && data[i].SubCategoriesId === subcats) {
