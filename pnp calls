@@ -1,6 +1,124 @@
 async function updateListItem() {
   try {
     if (matchingID !== null) {
+      await updateExistingItem();
+    } else {
+      await createNewItem();
+    }
+  } catch (error) {
+    console.error(error);
+    CreateErrorLog(listName, error);
+  }
+}
+
+async function updateExistingItem() {
+  var item = {
+    "__metadata": { "type": itemType },
+    "Status": param,
+    "CategoriesId": catids,
+    "SubCategoriesId": subcats,
+    "Effort": ($('#hours' + valuesId[i]).val() == "") ? 0 : parseInt($('#hours' + valuesId[i]).val(), 10),
+    "UserId": _spPageContextInfo.userId,
+    "ManagerId": ManagerId,
+    "Week": currentDate
+  };
+
+  var headers = {
+    "accept": "application/json;odata=verbose",
+    "content-type": "application/json;odata=verbose",
+    "X-RequestDigest": $("#__REQUESTDIGEST").val(),
+    "X-HTTP-Method": "MERGE",
+    "IF-MATCH": "*"
+  };
+
+  const response = await $.ajax({
+    url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById(" + matchingID + ")",
+    type: "POST",
+    contentType: "application/json;odata=verbose",
+    data: JSON.stringify(item),
+    headers: headers
+  });
+
+  console.log(response);
+}
+
+async function createNewItem() {
+  var item = {
+    "__metadata": { "type": itemType },
+    "Status": param,
+    "CategoriesId": $('#drpCat' + valuesId[i]).val(),
+    "SubCategoriesId": ($('#drpSubCat' + valuesId[i]).val() != "--select--") ? $('#drpSubCat' + valuesId[i]).val() : null,
+    "Effort": ($('#hours' + valuesId[i]).val() == "") ? 0 : parseInt($('#hours' + valuesId[i]).val(), 10),
+    "UserId": _spPageContextInfo.userId,
+    "SubNCategoryId": ($('#drpSubNCat' + valuesId[i]).val() != "--select--") ? $('#drpSubNCat' + valuesId[i]).val() : null,
+    "ManagerId": ManagerId,
+    "Week": currentDate
+  };
+
+  const response = await $.ajax({
+    url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+    type: "POST",
+    contentType: "application/json;odata=verbose",
+    data: JSON.stringify(item),
+    headers: {
+      "Accept": "application/json;odata=verbose",
+      "X-RequestDigest": $("#__REQUESTDIGEST").val()
+    }
+  });
+
+  console.log(response);
+}
+
+async function updateItemWithEmptyHoursCheck(ItemId, emptyhourscheck) {
+  var item = {
+    "__metadata": { "type": itemType },
+    "Status": param,
+    "CategoriesId": $('#drpCat' + valuesId[i]).val(),
+    "SubCategoriesId": ($('#drpSubCat' + valuesId[i]).val() != "--select--") ? $('#drpSubCat' + valuesId[i]).val() : null,
+    "Effort": ($('#hours' + valuesId[i]).val() == "") ? 0 : parseInt($('#hours' + valuesId[i]).val(), 10),
+    "UserId": _spPageContextInfo.userId,
+    "SubNCategoryId": ($('#drpSubNCat' + valuesId[i]).val() != "--select--") ? $('#drpSubNCat' + valuesId[i]).val() : null,
+    "ManagerId": ManagerId,
+    "Week": currentDate
+  };
+
+  try {
+    if (emptyhourscheck != 0) {
+      await updateItemWithMerge(ItemId, item);
+    } else {
+      await updateItemWithMerge(ItemId, item);
+    }
+  } catch (error) {
+    console.error(error);
+    CreateErrorLog(listName, error);
+  }
+}
+
+async function updateItemWithMerge(ItemId, item) {
+  const response = await $.ajax({
+    url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById(" + ItemId + ")",
+    type: "POST",
+    contentType: "application/json;odata=verbose",
+    data: JSON.stringify(item),
+    headers: {
+      "accept": "application/json;odata=verbose",
+      "content-type": "application/json;odata=verbose",
+      "X-RequestDigest": $("#__REQUESTDIGEST").val(),
+      "X-HTTP-Method": "MERGE",
+      "IF-MATCH": "*"
+    }
+  });
+
+  console.log(response);
+}
+
+// Call the function
+updateListItem();
+
+====
+async function updateListItem() {
+  try {
+    if (matchingID !== null) {
       var item = {
         "__metadata": { "type": itemType },
         "Status": param,
