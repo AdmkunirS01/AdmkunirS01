@@ -1,3 +1,192 @@
+
+  for (var i = 0; i < valuesId.length; i++) {
+            console.log($('#Item' + valuesId[i]).val());
+            var ItemId = parseInt($('#Item' + valuesId[i]).val(), 10);
+            allselectedIds.push($('#drpSubCat' + valuesId[i]).val());
+            getallids.push(ItemId)
+            console.log("getallids", getallids);
+            console.log(currentDate);
+            console.log("1038", retrivealldata)
+
+var emptyhourscheck= ($('#hours' + valuesId[i]).val() == "") ? 0 : parseInt($('#hours' + valuesId[i]).val(), 10);
+            function findMatchingID(catids, subcats, data) {
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].CategoriesId === catids && data[i].SubCategoriesId === subcats) {
+                        return data[i].ID;
+                    }
+                }
+                // Return null if no match is found
+                return null;
+            }
+            if (ItemId == 0) {
+                console.log("1038", retrivealldata)
+                var catids = parseInt($('#drpCat' + valuesId[i]).val());
+                var subcats = (parseInt($('#drpSubCat' + valuesId[i]).val()) != "--select--") ? parseInt($('#drpSubCat' + valuesId[i]).val()) : null;
+
+                matchingID = findMatchingID(catids, subcats, retrivealldata);
+
+                if (matchingID !== null) //update with exsting item
+                {
+                    var item = {
+                        "__metadata": { "type": itemType },
+
+                        "Status": param,
+                        "CategoriesId": catids,
+                        "SubCategoriesId": subcats,
+                        "Effort": ($('#hours' + valuesId[i]).val() == "") ? 0 : parseInt($('#hours' + valuesId[i]).val(), 10),
+                        "UserId": _spPageContextInfo.userId,
+                        //"SubNCategoryId":($('#drpSubNCat'+valuesId[i]).val() != "--select--")?$('#drpSubNCat'+valuesId[i]).val():null,
+                        "ManagerId": ManagerId,
+                        "Week": currentDate
+
+                    };
+                    var headers = {
+                        "accept": "application/json;odata=verbose",
+                        "content-type": "application/json;odata=verbose",
+                        "X-RequestDigest": $("#__REQUESTDIGEST").val(),
+                        "X-HTTP-Method": "MERGE",
+                        "IF-MATCH": "*"
+                    };
+                    $.ajax({
+                        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById(" + matchingID + ")",
+                        type: "POST",
+                        contentType: "application/json;odata=verbose",
+                        data: JSON.stringify(item),
+                        headers: headers,
+
+                        success: function (data) {
+                            console.log(data);
+                        },
+                        error: function (data) {
+                            console.log(data);
+                            CreateErrorLog(listName, data);
+
+                        }
+                    });
+
+                }
+                else // crete new items
+                {
+                    var item = {
+                        "__metadata": { "type": itemType },
+
+                        "Status": param,
+                        "CategoriesId": $('#drpCat' + valuesId[i]).val(),
+                        "SubCategoriesId": ($('#drpSubCat' + valuesId[i]).val() != "--select--") ? $('#drpSubCat' + valuesId[i]).val() : null,
+                        "Effort": ($('#hours' + valuesId[i]).val() == "") ? 0 : parseInt($('#hours' + valuesId[i]).val(), 10),
+                        "UserId": _spPageContextInfo.userId,
+                        "SubNCategoryId": ($('#drpSubNCat' + valuesId[i]).val() != "--select--") ? $('#drpSubNCat' + valuesId[i]).val() : null,
+                        "ManagerId": ManagerId,
+                        "Week": currentDate
+
+                    };
+
+                    $.ajax({
+                        url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+                        type: "POST",
+                        contentType: "application/json;odata=verbose",
+                        data: JSON.stringify(item),
+                        headers: {
+                            "Accept": "application/json;odata=verbose",
+                            "X-RequestDigest": $("#__REQUESTDIGEST").val()
+                        },
+                        success: function (data) {
+                            console.log(data);
+                        },
+                        error: function (data) {
+                            //console.log(data);
+                            CreateErrorLog(listName, data);
+                        }
+                    });
+                }
+
+
+
+
+            }
+
+            else if(emptyhourscheck!=0){
+                 var item = {
+                    "__metadata": { "type": itemType },
+
+                    "Status":param,
+                    "CategoriesId":$('#drpCat'+valuesId[i]).val(),
+                    "SubCategoriesId":($('#drpSubCat'+valuesId[i]).val() != "--select--")?$('#drpSubCat'+valuesId[i]).val():null,
+                    "Effort":($('#hours'+valuesId[i]).val()== "")?0:parseInt($('#hours'+valuesId[i]).val(),10),
+                    "UserId":_spPageContextInfo.userId,
+                    "SubNCategoryId":($('#drpSubNCat'+valuesId[i]).val() != "--select--")?$('#drpSubNCat'+valuesId[i]).val():null,
+                    "ManagerId":ManagerId,
+                    "Week":currentDate 
+
+                };
+
+                $.ajax({
+                    url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById("+ItemId+")",
+                    type: "POST",
+                    contentType: "application/json;odata=verbose",
+                    data: JSON.stringify(item),
+                    headers: {
+                        "accept":"application/json;odata=verbose",
+                		"content-type": "application/json;odata=verbose",
+                		"X-RequestDigest":$("#__REQUESTDIGEST").val(),
+                		"X-HTTP-Method": "MERGE",
+                		"IF-MATCH":"*"      
+                		  },
+                    success: function (data) {
+                        console.log(data);
+                    },
+                    error: function (data) {
+                        console.log(data);
+                        CreateErrorLog(listName,data); 
+
+                    }
+                });
+
+
+            }
+            else if(emptyhourscheck==0)
+            {
+                var item = {
+                    "__metadata": { "type": itemType },
+
+                    "Status":param,
+                    "CategoriesId":$('#drpCat'+valuesId[i]).val(),
+                    "SubCategoriesId":($('#drpSubCat'+valuesId[i]).val() != "--select--")?$('#drpSubCat'+valuesId[i]).val():null,
+                    "Effort":($('#hours'+valuesId[i]).val()== "")?0:parseInt($('#hours'+valuesId[i]).val(),10),
+                    "UserId":_spPageContextInfo.userId,
+                    "SubNCategoryId":($('#drpSubNCat'+valuesId[i]).val() != "--select--")?$('#drpSubNCat'+valuesId[i]).val():null,
+                    "ManagerId":ManagerId,
+                    "Week":currentDate 
+
+                };
+
+                $.ajax({
+                    url: _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById("+ItemId+")",
+                    type: "POST",
+                    contentType: "application/json;odata=verbose",
+                    data: JSON.stringify(item),
+                    headers: {
+                        "accept":"application/json;odata=verbose",
+                		"content-type": "application/json;odata=verbose",
+                		"X-RequestDigest":$("#__REQUESTDIGEST").val(),
+                		"X-HTTP-Method": "MERGE",
+                		"IF-MATCH":"*"      
+                		  },
+                    success: function (data) {
+                        console.log(data);
+                    },
+                    error: function (data) {
+                        console.log(data);
+                        CreateErrorLog(listName,data); 
+
+                    }
+                });
+
+
+            }
+        }
+=======================
+
 async function updateListItem() {
   try {
     if (matchingID !== null) {
