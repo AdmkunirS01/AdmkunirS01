@@ -1,3 +1,92 @@
+
+function SubmitEffortDetails(param) {
+    $(".se-pre-con").css("display", "block");
+
+    if (validateValues() == false || validateHours() == false) {
+        // ... (unchanged code)
+
+        return;
+    } else {
+        // ... (unchanged code)
+
+        // Use Promise.all to wait for all AJAX calls to complete
+        Promise.all(valuesId.map(async (valueId) => {
+            const ItemId = parseInt($('#Item' + valueId).val(), 10);
+            allselectedIds.push($('#drpSubCat' + valueId).val());
+            getallids.push(ItemId);
+
+            // ... (unchanged code)
+
+            const matchingID = findMatchingID(catids, subcats, retrivealldata);
+
+            if (ItemId == 0) {
+                // ... (unchanged code)
+            } else if (emptyhourscheck != 0) {
+                // ... (unchanged code)
+            } else if (emptyhourscheck == 0) {
+                // ... (unchanged code)
+            }
+
+            // Wrap the AJAX calls in a Promise to await their completion
+            function updateOrCreateItem(url, item, headers) {
+                return new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: url,
+                        type: "POST",
+                        contentType: "application/json;odata=verbose",
+                        data: JSON.stringify(item),
+                        headers: headers,
+                        success: function (data) {
+                            console.log(data);
+                            resolve(data);
+                        },
+                        error: function (data) {
+                            console.log(data);
+                            reject(data);
+                        }
+                    });
+                });
+            }
+
+            if (matchingID !== null) {
+                await updateOrCreateItem(
+                    _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/getItemById(" + matchingID + ")",
+                    item,
+                    headers
+                );
+            } else {
+                await updateOrCreateItem(
+                    _spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('" + listName + "')/items",
+                    item,
+                    {
+                        "Accept": "application/json;odata=verbose",
+                        "X-RequestDigest": $("#__REQUESTDIGEST").val()
+                    }
+                );
+            }
+        })).then(() => {
+            // ... (unchanged code)
+
+            // Use Promise.all to wait for all AJAX calls to complete
+            Promise.all([
+                updateOrCreateItem(_spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('EffortEntryTracker')/items?$select=ID,Week&$filter=UserId eq " + _spPageContextInfo.userId + " and Week ge '" + dayprevious2 + "' and Week le '" + daynext + "'", item, headers),
+                updateOrCreateItem(_spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('EffortEntryTracker')/getItemById(" + effortentry[0].ID + ")", item, headers),
+                updateOrCreateItem(_spPageContextInfo.siteAbsoluteUrl + "/_api/web/lists/getbytitle('EffortEntryTracker')/items", item, {
+                    "accept": "application/json;odata=verbose",
+                    "X-RequestDigest": $("#__REQUESTDIGEST").val(),
+                })
+            ]).then(() => {
+                // ... (unchanged code)
+            });
+
+        }).catch(error => {
+            console.error(error);
+        });
+    }
+}
+
+===========
+
 function SubmitEffortDetails(param) {
     $(".se-pre-con").css("display", "block");
 
